@@ -512,7 +512,7 @@ async function runCode() {
 
   try {
     // POST to your Spring Boot backend — which calls Gemini
-    const res = await fetch('http://localhost:8080/api/code/run', {
+    const res = await fetch('https://slm-b8oo.onrender.com/api/code/run', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -530,7 +530,7 @@ async function runCode() {
   } catch (err) {
     document.getElementById('outputBox').innerHTML =
       `<span class="out-error">⚠️ Could not reach backend.\n\n` +
-      `Make sure Spring Boot is running at:\nhttp://localhost:8080\n\n` +
+      `Make sure Spring Boot is running at:\nhttps://slm-b8oo.onrender.com\n\n` +
       `Error: ${escHtml(err.message)}</span>`;
     setStatus('✗ Error', 'var(--danger)');
   } finally {
@@ -609,7 +609,7 @@ async function runVisualize() {
     </div>`;
 
   try {
-    const res = await fetch('http://localhost:8080/api/code/visualize', {
+    const res = await fetch('https://slm-b8oo.onrender.com/api/code/visualize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: code, language: currentLang })

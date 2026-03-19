@@ -52,7 +52,7 @@ function beginQuiz() {
   console.log('Fetching quiz for course:', selectedCourse);
 
   // 4. Call backend
-  fetch('http://localhost:8080/api/quiz/generate?course=' + encodeURIComponent(selectedCourse))
+  fetch('https://slm-b8oo.onrender.com/api/quiz/generate?course=' + encodeURIComponent(selectedCourse))
     .then(res => {
       if (!res.ok) throw new Error('Server error: ' + res.status);
       return res.json();

@@ -1,0 +1,1 @@
+const BASE_URL = "https://slm-b8oo.onrender.com";

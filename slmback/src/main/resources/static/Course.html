@@ -761,7 +761,7 @@ async function runCode(editorId, outId) {
   outEl.style.fontStyle = 'normal';
   outEl.textContent   = '⏳ Running via Gemini AI...';
   try {
-    const res  = await fetch('http://localhost:8080/api/code/run', {
+    const res  = await fetch('https://slm-b8oo.onrender.com/api/code/run', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, language: C.lang, stdin: '' })
     });
@@ -797,7 +797,7 @@ async function startQuiz() {
   document.getElementById('quizQWrap').innerHTML =
     `<p style="color:var(--muted);padding:16px">⏳ Generating quiz with Gemini AI...</p>`;
   try {
-    const res  = await fetch('http://localhost:8080/api/quiz/generate?course=' + encodeURIComponent(C.name));
+    const res  = await fetch('https://slm-b8oo.onrender.com/api/quiz/generate?course=' + encodeURIComponent(C.name));
     const data = await res.json();
     if (!data || !data.length) throw new Error('No questions returned');
     quizQs = data; quizDone = false;
@@ -832,7 +832,7 @@ async function startAssessment() {
   document.getElementById('assessQWrap').innerHTML =
     `<p style="color:var(--muted);padding:16px">⏳ Generating final assessment...</p>`;
   try {
-    const res  = await fetch('http://localhost:8080/api/quiz/generate?course=' + encodeURIComponent(C.name));
+    const res  = await fetch('https://slm-b8oo.onrender.com/api/quiz/generate?course=' + encodeURIComponent(C.name));
     const data = await res.json();
     if (!data || !data.length) throw new Error('No questions');
     assessQs = data; assessDone = false;
