@@ -1,0 +1,181 @@
+.auth-modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+justify-content:center;
+align-items:center;
+}
+
+.auth-box{
+background:white;
+color:black;
+padding:30px;
+width:320px;
+border-radius:8px;
+text-align:center;
+position:relative;
+}
+
+.auth-box input{
+width:90%;
+padding:10px;
+margin:10px 0;
+border:1px solid #ccc;
+border-radius:4px;
+}
+
+.auth-box button{
+padding:10px 20px;
+background:black;
+color:white;
+border:none;
+border-radius:4px;
+cursor:pointer;
+}
+
+.close-btn{
+position:absolute;
+right:15px;
+top:10px;
+font-size:22px;
+cursor:pointer;
+}
+
+#switchText span{
+color:blue;
+cursor:pointer;
+}
+
+html{
+scroll-behavior:smooth;
+}
+
+body{
+margin:0;
+font-family:Segoe UI;
+background:#0f172a;
+color:white;
+}
+
+/* HEADER */
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+background:#020617;
+}
+
+.logo{
+font-size:24px;
+font-weight:bold;
+color:#38bdf8;
+}
+
+nav a{
+color:white;
+margin-left:20px;
+text-decoration:none;
+}
+
+/* HERO */
+
+.hero{
+text-align:center;
+padding:70px 20px;
+}
+
+.hero p{
+color:#94a3b8;
+}
+
+/* CARDS GRID */
+
+.cards{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:30px;
+padding:50px;
+}
+
+.feature-card{
+background:#1e293b;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.5);
+}
+
+.feature-card h2{
+color:#38bdf8;
+margin-bottom:10px;
+}
+
+.feature-card p{
+color:#cbd5f5;
+line-height:1.6;
+margin-bottom:20px;
+}
+
+.feature-card button{
+padding:10px 20px;
+border:none;
+background:#38bdf8;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.feature-card button:hover{
+background:#0ea5e9;
+}
+
+/* FOOTER */
+
+footer{
+text-align:center;
+padding:25px;
+background:#020617;
+}
+
+/* QUIZ MODAL */
+
+.quiz-modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+justify-content:center;
+align-items:center;
+}
+
+.quiz-box{
+background:white;
+color:black;
+padding:30px;
+width:350px;
+border-radius:8px;
+text-align:center;
+position:relative;
+}
+
+.quiz-box ul{
+text-align:left;
+margin-top:10px;
+}
+
+.quiz-box button{
+margin-top:15px;
+padding:10px 20px;
+background:black;
+color:white;
+border:none;
+cursor:pointer;
+}

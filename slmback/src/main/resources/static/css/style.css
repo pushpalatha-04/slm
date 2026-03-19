@@ -1,0 +1,76 @@
+body{
+margin:0;
+font-family:Segoe UI;
+background:#0f172a;
+color:white;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+background:#020617;
+}
+
+.logo{
+font-size:24px;
+font-weight:bold;
+color:#38bdf8;
+}
+
+nav a{
+color:white;
+margin-left:20px;
+text-decoration:none;
+}
+
+.hero{
+text-align:center;
+padding:70px 20px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:30px;
+padding:50px;
+}
+
+.feature-card{
+
+background:#1e293b;
+
+padding:30px;
+
+border-radius:10px;
+
+box-shadow:0 5px 20px rgba(0,0,0,0.5);
+
+}
+
+.feature-card button{
+
+padding:10px 20px;
+
+background:#38bdf8;
+
+border:none;
+
+border-radius:6px;
+
+color:white;
+
+cursor:pointer;
+
+}
+
+footer{
+
+text-align:center;
+
+padding:25px;
+
+background:#020617;
+
+}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - SLM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
+      --border: #2e3248; --accent: #7c6af7;
+      --danger: #f56565; --success: #68d391;
+      --text: #e2e8f0; --muted: #718096;
+      --sans: 'Sora', sans-serif; --body: 'Inter', sans-serif;
+    }
+    body { font-family: var(--body); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 40px 36px; width: 420px; max-width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+    .logo    { font-family: var(--sans); font-size: 1.6rem; font-weight: 700; color: var(--accent); text-align: center; margin-bottom: 4px; }
+    .tagline { text-align: center; font-size: .85rem; color: var(--muted); margin-bottom: 28px; }
+    .tabs    { display: flex; background: var(--surface2); border-radius: 10px; padding: 4px; margin-bottom: 28px; gap: 4px; }
+    .tab     { flex: 1; padding: 9px; border: none; border-radius: 7px; font-family: var(--sans); font-size: .88rem; font-weight: 600; cursor: pointer; transition: all .2s; background: transparent; color: var(--muted); }
+    .tab.active { background: var(--accent); color: #fff; }
+    .role-row { display: flex; gap: 10px; margin-bottom: 20px; }
+    .role-btn { flex: 1; padding: 12px 8px; border: 2px solid var(--border); border-radius: 10px; background: var(--surface2); color: var(--muted); font-family: var(--sans); font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s; text-align: center; }
+    .role-btn:hover  { border-color: var(--accent); color: var(--text); }
+    .role-btn.active { border-color: var(--accent); background: rgba(124,106,247,.15); color: var(--text); }
+    .r-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+    .fg { margin-bottom: 16px; }
+    .fl { display: block; font-size: .77rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; }
+    .fi { width: 100%; padding: 11px 14px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; font-size: .9rem; color: var(--text); font-family: var(--body); outline: none; transition: border-color .2s; }
+    .fi:focus { border-color: var(--accent); }
+    .fi::placeholder { color: var(--muted); opacity: .55; }
+    .sbtn { width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: var(--sans); font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 4px; transition: all .2s; }
+    .sbtn:hover    { filter: brightness(1.1); }
+    .sbtn:disabled { opacity: .55; cursor: not-allowed; filter: none; }
+    .msg { padding: 11px 14px; border-radius: 8px; font-size: .85rem; margin-top: 14px; display: none; }
+    .msg.err { background: rgba(245,101,101,.12); border: 1px solid var(--danger); color: var(--danger); display: block; }
+    .msg.ok  { background: rgba(104,211,145,.12); border: 1px solid var(--success); color: var(--success); display: block; }
+    .bk { display: block; text-align: center; margin-top: 22px; font-size: .83rem; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .bk:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">SLM</div>
+  <div class="tagline">Smart Learning Platform</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">Login</button>
+    <button class="tab"        onclick="switchTab('signup')">Sign Up</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginForm">
+    <div class="fg"><label class="fl">Username or Email</label><input class="fi" id="lu" type="text" placeholder="Enter username or email" autocomplete="username"></div>
+    <div class="fg"><label class="fl">Password</label><input class="fi" id="lp" type="password" placeholder="Enter password" autocomplete="current-password"></div>
+    <button class="sbtn" id="loginBtn" onclick="doLogin()">Login →</button>
+    <div class="msg" id="lm"></div>
+  </div>
+
+  <!-- SIGNUP -->
+  <div id="signupForm" style="display:none">
+    <div class="role-row">
+      <div class="role-btn active" id="rStudent" onclick="selectRole('STUDENT')"><span class="r-icon">🎓</span>Student</div>
+      <div class="role-btn"        id="rTutor"   onclick="selectRole('TUTOR')">  <span class="r-icon">👨‍🏫</span>Tutor</div>
+    </div>
+    <div class="fg"><label class="fl">Full Name</label>  <input class="fi" id="sn" type="text"     placeholder="Your full name"></div>
+    <div class="fg"><label class="fl">Username</label>   <input class="fi" id="su" type="text"     placeholder="Choose a username" autocomplete="username"></div>
+    <div class="fg"><label class="fl">Email</label>      <input class="fi" id="se" type="email"    placeholder="your@email.com"></div>
+    <div class="fg"><label class="fl">Password</label>   <input class="fi" id="sp" type="password" placeholder="Min 6 characters" autocomplete="new-password"></div>
+    <button class="sbtn" id="signupBtn" onclick="doSignup()">Create Account →</button>
+    <div class="msg" id="sm"></div>
+  </div>
+
+  <a href="index.html" class="bk">← Back to Home</a>
+</div>
+
+<script>
+  const API = 'http://localhost:8080/api/auth';
+  let selRole = 'STUDENT';
+
+  function switchTab(t) {
+    document.querySelectorAll('.tab').forEach((el, i) =>
+      el.classList.toggle('active', (t === 'login' && i === 0) || (t === 'signup' && i === 1))
+    );
+    document.getElementById('loginForm').style.display  = t === 'login'  ? 'block' : 'none';
+    document.getElementById('signupForm').style.display = t === 'signup' ? 'block' : 'none';
+    clearMsg();
+  }
+
+  function selectRole(r) {
+    selRole = r;
+    document.getElementById('rStudent').classList.toggle('active', r === 'STUDENT');
+    document.getElementById('rTutor').classList.toggle('active',   r === 'TUTOR');
+  }
+
+  function clearMsg() {
+    ['lm','sm'].forEach(id => { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; });
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg ' + type;
+  }
+
+  // ── KEY FIX: save everything into ONE slm_user object ──────
+  // Both dashboards read: JSON.parse(localStorage.getItem('slm_user'))
+  // and expect: user.userId, user.role, user.fullName, user.username
+  function saveAuth(data) {
+    const role = (data.role || '').toUpperCase();
+    localStorage.setItem('slm_token', data.token);
+    localStorage.setItem('slm_user', JSON.stringify({
+      userId:   data.userId,
+      role:     role,
+      username: data.username,
+      fullName: data.fullName || data.username
+    }));
+  }
+
+  function redirectAfterAuth(role) {
+    const r = (role || '').toUpperCase();
+    if (r === 'TUTOR') {
+      window.location.href = 'tutor-dashboard.html';
+    } else {
+      window.location.href = 'student-dashboard.html';
+    }
+  }
+
+  async function doLogin() {
+    const u   = document.getElementById('lu').value.trim();
+    const p   = document.getElementById('lp').value.trim();
+    const btn = document.getElementById('loginBtn');
+    if (!u || !p) { showMsg('lm', 'Please enter username and password.', 'err'); return; }
+    btn.disabled = true; btn.textContent = 'Logging in...';
+    try {
+      const res  = await fetch(API + '/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      const data = await res.json();
+      if (data.success) {
+        saveAuth(data);
+        showMsg('lm', '✅ Login successful! Redirecting...', 'ok');
+        setTimeout(() => redirectAfterAuth(data.role), 700);
+      } else {
+        showMsg('lm', '❌ ' + (data.message || 'Login failed'), 'err');
+      }
+    } catch {
+      showMsg('lm', '⚠️ Cannot reach server. Make sure Spring Boot is running on port 8080.', 'err');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Login →';
+    }
+  }
+
+  async function doSignup() {
+    const fullName = document.getElementById('sn').value.trim();
+    const username = document.getElementById('su').value.trim();
+    const email    = document.getElementById('se').value.trim();
+    const password = document.getElementById('sp').value.trim();
+    const btn = document.getElementById('signupBtn');
+    if (!username || !email || !password) { showMsg('sm', 'Please fill in all required fields.', 'err'); return; }
+    btn.disabled = true; btn.textContent = 'Creating account...';
+    try {
+      const res  = await fetch(API + '/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, role: selRole, fullName })
+      });
+      const data = await res.json();
+      if (data.success) {
+        saveAuth(data);
+        showMsg('sm', '✅ Account created! Redirecting...', 'ok');
+        setTimeout(() => redirectAfterAuth(data.role), 700);
+      } else {
+        showMsg('sm', '❌ ' + (data.message || 'Signup failed'), 'err');
+      }
+    } catch {
+      showMsg('sm', '⚠️ Cannot reach server. Make sure Spring Boot is running on port 8080.', 'err');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create Account →';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (document.getElementById('loginForm').style.display !== 'none') doLogin();
+      else doSignup();
+    }
+  });
+
+  // Already logged in? redirect away
+  const existingToken = localStorage.getItem('slm_token');
+  const existingUser  = JSON.parse(localStorage.getItem('slm_user') || '{}');
+  if (existingToken && existingUser.role) {
+    redirectAfterAuth(existingUser.role);
+  }
+</script>
+</body>
+</html>

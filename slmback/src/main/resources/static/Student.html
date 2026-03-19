@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - SLM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3248;
+      --accent:#7c6af7;--accent2:#4fd1c5;--danger:#f56565;--success:#68d391;
+      --warning:#f6ad55;--text:#e2e8f0;--muted:#718096;
+      --sans:'Sora',sans-serif;--body:'Inter',sans-serif;
+    }
+    body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+    /* ── HEADER ── */
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .logo{font-family:var(--sans);font-weight:700;font-size:1.1rem;color:var(--accent)}
+    .hdr-right{display:flex;align-items:center;gap:12px;position:relative}
+
+    /* ── AVATAR ── */
+    .avatar-btn{width:36px;height:36px;border-radius:50%;background:var(--accent2);border:none;cursor:pointer;font-family:var(--sans);font-size:.95rem;font-weight:700;color:#0d2a28;display:flex;align-items:center;justify-content:center;transition:filter .2s;flex-shrink:0}
+    .avatar-btn:hover{filter:brightness(1.1)}
+    .avatar-dropdown{display:none;position:absolute;top:44px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:6px;min-width:220px;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+    .avatar-dropdown.open{display:block}
+    .av-header{padding:12px 14px 10px;border-bottom:1px solid var(--border);margin-bottom:6px}
+    .av-name{font-family:var(--sans);font-weight:700;font-size:.95rem;margin-bottom:2px}
+    .av-role{font-size:.75rem;color:var(--accent2);background:rgba(79,209,197,.12);padding:2px 8px;border-radius:10px;display:inline-block;font-weight:600}
+    .av-email{font-size:.78rem;color:var(--muted);margin-top:4px}
+    .av-item{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:.84rem;color:var(--muted);transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:var(--body)}
+    .av-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+    .av-item.danger:hover{background:rgba(245,101,101,.1);color:var(--danger)}
+    .av-divider{height:1px;background:var(--border);margin:4px 0}
+
+    /* ── LAYOUT ── */
+    .layout{display:flex;flex:1;overflow:hidden}
+    .sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sb-item{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:.84rem;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+    .sb-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+    .sb-item.active{background:rgba(124,106,247,.12);color:var(--text);border-left-color:var(--accent)}
+    .main{flex:1;overflow-y:auto;padding:24px}
+    .panel{display:none}.panel.active{display:block}
+    .panel-title{font-family:var(--sans);font-size:1.3rem;font-weight:700;margin-bottom:6px}
+    .panel-sub{font-size:.88rem;color:var(--muted);margin-bottom:22px}
+
+    /* ── BUTTONS ── */
+    .btn{padding:8px 18px;border:none;border-radius:8px;font-family:var(--sans);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{filter:brightness(1.1)}
+    .btn-sm{padding:5px 12px;font-size:.78rem}
+
+    /* ── COURSE CARDS ── */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+    .course-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .2s;cursor:pointer}
+    .course-card:hover{border-color:var(--accent)}
+    .cc-title{font-family:var(--sans);font-size:1rem;font-weight:700;margin-bottom:4px}
+    .cc-tutor{font-size:.78rem;color:var(--accent2);margin-bottom:8px}
+    .cc-sub{font-size:.8rem;color:var(--muted);margin-bottom:12px}
+
+    /* ── CONTENT VIEWER ── */
+    .content-list{display:flex;flex-direction:column;gap:10px;max-width:720px}
+    .content-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .2s}
+    .content-item:hover{border-color:var(--accent)}
+    .ci-header{display:flex;align-items:center;gap:12px;cursor:pointer}
+    .ci-icon{font-size:1.4rem;flex-shrink:0}
+    .ci-info{flex:1}
+    .ci-title{font-size:.9rem;font-weight:600;margin-bottom:2px}
+    .ci-type{font-size:.72px;padding:2px 8px;border-radius:10px;font-weight:600;font-size:.72rem}
+    .ci-type.PDF{background:rgba(245,101,101,.15);color:var(--danger)}
+    .ci-type.VIDEO{background:rgba(124,106,247,.15);color:var(--accent)}
+    .ci-type.QUIZ{background:rgba(246,173,85,.15);color:var(--warning)}
+    .ci-type.CODING{background:rgba(104,211,145,.15);color:var(--success)}
+    .ci-body{margin-top:12px;display:none}
+    .ci-body.open{display:block}
+
+    /* ── QUIZ ── */
+    .q-card{background:var(--surface2);border-radius:8px;padding:14px;margin-bottom:10px}
+    .q-card h3{font-size:.9rem;margin-bottom:10px;line-height:1.5}
+    .q-opt{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:7px;margin-bottom:6px;border:1.5px solid var(--border);cursor:pointer;font-size:.87rem;transition:all .15s;color:var(--text)}
+    .q-opt:hover{border-color:var(--accent);background:rgba(124,106,247,.08)}
+    .q-opt input{accent-color:var(--accent)}
+    .q-opt.correct{background:rgba(104,211,145,.1);border-color:var(--success)!important;color:var(--success)}
+    .q-opt.wrong{background:rgba(245,101,101,.1);border-color:var(--danger)!important;color:var(--danger)}
+
+    /* ── CODE EDITOR ── */
+    .code-area{width:100%;min-height:200px;background:var(--bg);color:var(--text);font-family:monospace;font-size:13px;line-height:1.7;border:none;outline:none;padding:14px;resize:vertical;tab-size:4}
+    .out-box{min-height:50px;padding:12px;font-family:monospace;font-size:13px;background:#0a0d17;white-space:pre-wrap;color:var(--success)}
+
+    /* ── PILLS ── */
+    .pills-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+    .course-pill{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:.82rem;cursor:pointer;transition:all .2s;font-family:var(--body)}
+    .course-pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+    /* ── CHAT ── */
+    .chat-wrap{display:flex;flex-direction:column;height:460px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:700px}
+    .chat-hdr{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:.9rem}
+    .chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .msg-bubble{max-width:70%;padding:9px 13px;border-radius:12px;font-size:.85rem;line-height:1.5}
+    .msg-me{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+    .msg-other{background:var(--surface2);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+    .msg-name{font-size:.7rem;margin-bottom:2px;opacity:.7}
+    .msg-time{font-size:.65rem;opacity:.6;margin-top:2px;text-align:right}
+    .chat-input-row{padding:12px;border-top:1px solid var(--border);display:flex;gap:10px}
+    .chat-input{flex:1;padding:9px 13px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--body);font-size:.88rem;outline:none}
+    .chat-input:focus{border-color:var(--accent)}
+
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">SLM</div>
+  <div class="hdr-right">
+    <button class="avatar-btn" id="avatarBtn" onclick="toggleDropdown()">S</button>
+    <div class="avatar-dropdown" id="avatarDropdown">
+      <div class="av-header">
+        <div class="av-name" id="av-fullname">—</div>
+        <div class="av-role">STUDENT</div>
+        <div class="av-email" id="av-username">—</div>
+      </div>
+      <button class="av-item" onclick="showPanel('courses');closeDropdown()">📚 My Courses</button>
+      <button class="av-item" onclick="showPanel('attendance');closeDropdown()">📋 My Attendance</button>
+      <div class="av-divider"></div>
+      <button class="av-item danger" onclick="logout()">🚪 Logout</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar">
+    <div class="sb-item active" onclick="showPanel('courses')"    id="nav-courses">    📚 My Courses</div>
+    <div class="sb-item"        onclick="showPanel('learn')"      id="nav-learn">      🎓 Learn</div>
+    <div class="sb-item"        onclick="showPanel('attendance')" id="nav-attendance"> 📋 Attendance</div>
+    <div class="sb-item"        onclick="showPanel('chat')"       id="nav-chat">       💬 Chat</div>
+  </div>
+
+  <div class="main">
+
+    <!-- COURSES -->
+    <div class="panel active" id="panel-courses">
+      <div class="panel-title">📚 My Courses</div>
+      <div class="panel-sub">Enroll in a course using the code your tutor gave you.</div>
+      <div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap">
+        <input id="enrollCodeInput" placeholder="Enter 6-digit enroll code (e.g. ABC123)"
+          style="padding:10px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--body);font-size:.9rem;outline:none;flex:1;min-width:200px;max-width:320px">
+        <button class="btn btn-primary" onclick="enrollCourse()">Enroll Now</button>
+      </div>
+      <div id="enrollMsg" style="font-size:.85rem;margin-bottom:16px"></div>
+      <div class="cards-grid" id="myCoursesGrid">
+        <div style="color:var(--muted);font-size:.88rem">Loading your courses...</div>
+      </div>
+    </div>
+
+    <!-- LEARN -->
+    <div class="panel" id="panel-learn">
+      <div class="panel-title">🎓 Learn</div>
+      <div class="panel-sub">Select a course to view its content.</div>
+      <div class="pills-row" id="learnCoursePills"></div>
+      <div class="content-list" id="learnContentList">
+        <div style="color:var(--muted)">Select a course to start learning</div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div class="panel" id="panel-attendance">
+      <div class="panel-title">📋 My Attendance</div>
+      <div class="panel-sub">View your attendance across all courses.</div>
+      <div class="pills-row" id="attCoursePills"></div>
+      <div id="attContent"><div style="color:var(--muted)">Select a course</div></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="panel" id="panel-chat">
+      <div class="panel-title">💬 Chat</div>
+      <div class="panel-sub">Chat with your tutor and classmates.</div>
+      <div class="pills-row" id="chatCoursePills"></div>
+      <div class="chat-wrap">
+        <div class="chat-hdr" id="chatHdr">Select a course to start chatting</div>
+        <div class="chat-msgs" id="chatMsgs"></div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
+          <button class="btn btn-primary btn-sm" onclick="sendMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+const API = 'http://localhost:8080';
+
+// ── GUARD: must be STUDENT ────────────────────────────────
+if (!requireRole('STUDENT')) { /* redirected */ }
+
+// ── Read user from unified slm_user object ────────────────
+const currentUser = getUser();
+const token       = getToken();
+
+// ── Populate avatar ───────────────────────────────────────
+const displayName = currentUser.fullName || currentUser.username || 'Student';
+const initials    = displayName.charAt(0).toUpperCase();
+document.getElementById('avatarBtn').textContent   = initials;
+document.getElementById('av-fullname').textContent = displayName;
+document.getElementById('av-username').textContent = '@' + (currentUser.username || '');
+
+// ── Avatar dropdown ───────────────────────────────────────
+function toggleDropdown() {
+  document.getElementById('avatarDropdown').classList.toggle('open');
+}
+function closeDropdown() {
+  document.getElementById('avatarDropdown').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.hdr-right')) closeDropdown();
+});
+
+// ── State ─────────────────────────────────────────────────
+let myCourses    = [];
+let activeCourse = null;
+let stompClient  = null;
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('nav-'   + name).classList.add('active');
+}
+
+// ── API helper ────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(API + path, opts);
+    return await res.json();
+  } catch (e) {
+    console.error(path, e);
+    return { success: false, message: e.message };
+  }
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Load enrolled courses ─────────────────────────────────
+async function loadCourses() {
+  const res = await api('GET', '/api/courses/enrolled');
+  myCourses = res.courses || [];
+  renderCourseCards();
+  renderAllPills();
+}
+
+function renderCourseCards() {
+  const el = document.getElementById('myCoursesGrid');
+  if (!myCourses.length) {
+    el.innerHTML = '<div style="color:var(--muted)">You have not enrolled in any courses yet. Enter an enroll code above!</div>';
+    return;
+  }
+  el.innerHTML = myCourses.map(c => `
+    <div class="course-card" onclick="goLearn('${c.id}')">
+      <div class="cc-title">${esc(c.title)}</div>
+      <div class="cc-tutor">👨‍🏫 ${esc(c.tutorName || '')}</div>
+      <div class="cc-sub">${esc(c.description || c.subject || '')}</div>
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();goLearn('${c.id}')">Start Learning →</button>
+    </div>`).join('');
+}
+
+function renderAllPills() {
+  ['learn','att','chat'].forEach(prefix => {
+    const el = document.getElementById(prefix + 'CoursePills');
+    if (!el) return;
+    el.innerHTML = myCourses.map(c =>
+      `<button class="course-pill" id="${prefix}-pill-${c.id}" onclick="selectCourse('${prefix}','${c.id}')">${esc(c.title)}</button>`
+    ).join('');
+  });
+}
+
+function goLearn(courseId) {
+  showPanel('learn');
+  selectCourse('learn', courseId);
+}
+
+function selectCourse(prefix, courseId) {
+  document.querySelectorAll(`.course-pill`).forEach(p => p.classList.remove('active'));
+  const pill = document.getElementById(`${prefix}-pill-${courseId}`);
+  if (pill) pill.classList.add('active');
+  activeCourse = courseId;
+  if (prefix === 'learn') loadContent(courseId);
+  if (prefix === 'att')   loadAttendance(courseId);
+  if (prefix === 'chat')  initChat(courseId);
+}
+
+// ── Enroll ────────────────────────────────────────────────
+async function enrollCourse() {
+  const code  = document.getElementById('enrollCodeInput').value.trim().toUpperCase();
+  const msgEl = document.getElementById('enrollMsg');
+  if (!code) { msgEl.textContent = 'Enter a code first.'; msgEl.style.color = 'var(--danger)'; return; }
+  const res = await api('POST', '/api/courses/enroll', { enrollCode: code });
+  if (res.success) {
+    msgEl.textContent = '✅ ' + res.message; msgEl.style.color = 'var(--success)';
+    document.getElementById('enrollCodeInput').value = '';
+    loadCourses();
+  } else {
+    msgEl.textContent = '❌ ' + res.message; msgEl.style.color = 'var(--danger)';
+  }
+}
+
+// ── Content ───────────────────────────────────────────────
+async function loadContent(courseId) {
+  // Auto-mark attendance when student opens content
+  await api('POST', '/api/attendance/auto', {
+    courseId,
+    studentName: currentUser.fullName || currentUser.username
+  });
+
+  const res  = await api('GET', '/api/content/course/' + courseId);
+  const list = res.content || [];
+  const el   = document.getElementById('learnContentList');
+
+  if (!list.length) {
+    el.innerHTML = '<div style="color:var(--muted)">No content yet. Your tutor will add lessons soon.</div>';
+    return;
+  }
+
+  // Store for quiz/coding use
+  window._contentMap = {};
+  list.forEach(c => { window._contentMap[c.id] = c; });
+
+  const icons = { PDF:'📄', VIDEO:'▶️', QUIZ:'🧠', CODING:'💻' };
+  el.innerHTML = list.map(c => `
+    <div class="content-item" id="ci-${c.id}">
+      <div class="ci-header" onclick="toggleContent('${c.id}')">
+        <div class="ci-icon">${icons[c.type] || '📌'}</div>
+        <div class="ci-info">
+          <div class="ci-title">${esc(c.title)}</div>
+          <span class="ci-type ${c.type}">${c.type}</span>
+          ${c.description ? `<div style="font-size:.78rem;color:var(--muted);margin-top:3px">${esc(c.description)}</div>` : ''}
+        </div>
+        <span style="color:var(--muted);font-size:.8rem">▼</span>
+      </div>
+      <div class="ci-body" id="cib-${c.id}">
+        ${buildContentBody(c)}
+      </div>
+    </div>`).join('');
+}
+
+// ── FIX: use c.fileUrl for both VIDEO and PDF ─────────────
+function buildContentBody(c) {
+  if (c.type === 'VIDEO') {
+    if (!c.fileUrl) return '<div style="color:var(--muted);margin-top:10px">No video URL set.</div>';
+    // Support youtube.com/watch?v=, youtu.be/, and already-embedded URLs
+    const ytEmbed = c.fileUrl
+      .replace('watch?v=', 'embed/')
+      .replace('youtu.be/', 'www.youtube.com/embed/');
+    return `<div style="margin-top:10px">
+      <iframe width="100%" height="340" src="${ytEmbed}"
+        frameborder="0" allowfullscreen
+        style="border-radius:8px;display:block"></iframe>
+    </div>`;
+  }
+
+  if (c.type === 'PDF') {
+    if (!c.fileUrl) return '<div style="color:var(--muted);margin-top:10px">No PDF URL set.</div>';
+    return `<div style="margin-top:10px">
+      <a href="${esc(c.fileUrl)}" target="_blank" class="btn btn-primary btn-sm"
+        style="display:inline-block;margin-bottom:10px">📄 Open PDF in new tab</a>
+      <iframe src="${esc(c.fileUrl)}" width="100%" height="400"
+        style="border-radius:8px;border:1px solid var(--border);display:block"></iframe>
+    </div>`;
+  }
+
+  if (c.type === 'QUIZ') {
+    if (!c.questions || !c.questions.length) {
+      return '<div style="color:var(--muted);margin-top:10px">No questions added yet.</div>';
+    }
+    return `<div style="margin-top:12px">
+      ${c.questions.map((q, i) => `
+        <div class="q-card">
+          <h3>Q${i+1}. ${esc(q.question)}</h3>
+          ${['A','B','C','D'].map(opt => `
+            <label class="q-opt" id="qopt-${c.id}-${i}-${opt}">
+              <input type="radio" name="q-${c.id}-${i}" value="${opt}">
+              <span><b>${opt})</b> ${esc(q['option'+opt])}</span>
+            </label>`).join('')}
+        </div>`).join('')}
+      <button class="btn btn-primary" onclick="submitQuiz('${c.id}','${c.courseId}')">Submit Quiz</button>
+      <div id="quiz-result-${c.id}" style="margin-top:10px;font-size:.88rem"></div>
+    </div>`;
+  }
+
+  if (c.type === 'CODING') {
+    return `<div style="margin-top:12px">
+      <div style="font-size:.88rem;color:var(--muted);margin-bottom:10px;background:var(--surface2);padding:12px;border-radius:8px;line-height:1.6;white-space:pre-wrap">${esc(c.problemStatement || '')}</div>
+      <div style="background:var(--surface2);border-radius:8px;overflow:hidden;margin-bottom:10px">
+        <div style="background:var(--surface);padding:8px 14px;font-size:.75rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center">
+          <span>${esc(c.language || 'java')}</span>
+        </div>
+        <textarea class="code-area" id="code-${c.id}">${esc(c.starterCode || '')}</textarea>
+        <div style="border-top:1px solid var(--border)">
+          <div style="padding:5px 14px;font-size:.72rem;color:var(--muted);background:#0a0d17">output</div>
+          <div class="out-box" id="out-${c.id}">// Write your code and click Submit</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="submitCode('${c.id}','${c.courseId}','${esc(c.language || 'java')}')">Submit Code</button>
+      <div id="code-result-${c.id}" style="margin-top:8px;font-size:.85rem"></div>
+    </div>`;
+  }
+
+  return '';
+}
+
+function toggleContent(id) {
+  document.getElementById('cib-' + id)?.classList.toggle('open');
+}
+
+// ── Quiz submit ───────────────────────────────────────────
+async function submitQuiz(contentId, courseId) {
+  const content = window._contentMap[contentId];
+  if (!content) return;
+  const answers = {};
+  content.questions.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q-${contentId}-${i}"]:checked`);
+    if (sel) answers[String(i)] = sel.value;
+  });
+  const res = await api('POST', '/api/submissions/quiz', { contentId, courseId, answers });
+  const el  = document.getElementById('quiz-result-' + contentId);
+
+  // Highlight correct / wrong answers
+  content.questions.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q-${contentId}-${i}"]:checked`);
+    ['A','B','C','D'].forEach(opt => {
+      const lbl = document.getElementById(`qopt-${contentId}-${i}-${opt}`);
+      if (!lbl) return;
+      lbl.querySelector('input').disabled = true;
+      if (opt === q.correctAnswer) lbl.classList.add('correct');
+      else if (sel && sel.value === opt) lbl.classList.add('wrong');
+    });
+  });
+
+  const pct = res.total > 0 ? Math.round(res.score / res.total * 100) : 0;
+  el.innerHTML = `<div style="background:${res.passed?'rgba(104,211,145,.12)':'rgba(245,101,101,.1)'};
+    border-radius:8px;padding:12px;color:${res.passed?'var(--success)':'var(--danger)'}">
+    Score: <b>${res.score}/${res.total}</b> (${pct}%) — ${res.passed ? '🏆 Passed!' : '📚 Keep trying!'}
+  </div>`;
+}
+
+// ── FIX: runCode removed — no backend execution endpoint ──
+// Students write code and submit; tutor reviews it
+
+// ── Submit code ───────────────────────────────────────────
+async function submitCode(contentId, courseId, language) {
+  const code   = document.getElementById('code-' + contentId)?.value || '';
+  const outEl  = document.getElementById('out-'  + contentId);
+  const resEl  = document.getElementById('code-result-' + contentId);
+
+  if (!code.trim()) {
+    resEl.textContent = '⚠️ Write some code before submitting.';
+    resEl.style.color = 'var(--warning)';
+    return;
+  }
+
+  if (outEl) {
+    outEl.style.color = 'var(--warning)';
+    outEl.textContent = '⏳ Submitting...';
+  }
+
+  const res = await api('POST', '/api/submissions/coding', {
+    contentId, courseId, code, language, output: ''
+  });
+
+  if (outEl) {
+    outEl.style.color = res.success ? 'var(--success)' : 'var(--danger)';
+    outEl.textContent = res.success
+      ? '✅ Code submitted! Your tutor will review it.'
+      : '❌ Submission failed. Try again.';
+  }
+
+  resEl.textContent = '';
+}
+
+// ── Attendance ────────────────────────────────────────────
+async function loadAttendance(courseId) {
+  const res     = await api('GET', '/api/attendance/my/' + courseId);
+  const records = res.attendance || [];
+  const el      = document.getElementById('attContent');
+  const present = records.filter(r => r.status === 'PRESENT').length;
+  const absent  = records.filter(r => r.status === 'ABSENT').length;
+  const pct     = records.length > 0 ? Math.round(present / records.length * 100) : 0;
+
+  el.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:500px;margin-bottom:20px">
+      <div style="font-size:2.5rem;font-weight:700;font-family:var(--sans);color:${pct>=75?'var(--success)':'var(--danger)'}">${pct}%</div>
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px">Attendance Percentage ${pct < 75 ? '⚠️ Below 75%' : '✅ Good'}</div>
+      <div style="display:flex;gap:14px">
+        <div style="font-size:.85rem"><b style="color:var(--success)">${present}</b> <span style="color:var(--muted)">Present</span></div>
+        <div style="font-size:.85rem"><b style="color:var(--danger)">${absent}</b>  <span style="color:var(--muted)">Absent</span></div>
+        <div style="font-size:.85rem"><b>${records.length}</b> <span style="color:var(--muted)">Total</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;max-width:400px">
+      ${records.map(r => `
+        <div style="display:flex;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem">
+          <span>${esc(String(r.date))}</span>
+          <span style="color:${r.status==='PRESENT'?'var(--success)':'var(--danger)'}">● ${r.status}</span>
+        </div>`).join('')}
+      ${!records.length ? '<div style="color:var(--muted)">No attendance records yet.</div>' : ''}
+    </div>`;
+}
+
+// ── Chat ──────────────────────────────────────────────────
+async function initChat(courseId) {
+  activeCourse = courseId;
+  document.getElementById('chatHdr').textContent = '📢 Group Chat — ' + (myCourses.find(c => c.id === courseId)?.title || '');
+  const res  = await api('GET', '/api/chat/course/' + courseId);
+  const msgs = res.messages || [];
+  const el   = document.getElementById('chatMsgs');
+  el.innerHTML = '';
+  msgs.forEach(m => appendMsg(m, false));
+  el.scrollTop = el.scrollHeight;
+
+  if (stompClient) stompClient.disconnect();
+  const socket = new SockJS(API + '/ws');
+  stompClient  = Stomp.over(socket);
+  stompClient.debug = null;
+  stompClient.connect({}, () => {
+    stompClient.subscribe('/topic/chat/' + courseId, msg => {
+      appendMsg(JSON.parse(msg.body));
+    });
+  });
+}
+
+function appendMsg(m, scroll = true) {
+  const el   = document.getElementById('chatMsgs');
+  const isMe = m.senderId === currentUser.userId;
+  const div  = document.createElement('div');
+  div.className = 'msg-bubble ' + (isMe ? 'msg-me' : 'msg-other');
+  div.innerHTML =
+    (!isMe ? `<div class="msg-name">${esc(m.senderName)} · ${esc(m.senderRole || '')}</div>` : '') +
+    esc(m.text) +
+    `<div class="msg-time">${new Date(m.sentAt || Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;
+  el.appendChild(div);
+  if (scroll) el.scrollTop = el.scrollHeight;
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const text  = input.value.trim();
+  if (!text || !activeCourse) return;
+  input.value = '';
+  const payload = {
+    courseId:   activeCourse,
+    senderId:   currentUser.userId,
+    senderName: currentUser.fullName || currentUser.username,
+    senderRole: 'STUDENT',
+    text
+  };
+  if (stompClient && stompClient.connected) {
+    stompClient.send('/app/chat.send', {}, JSON.stringify(payload));
+  } else {
+    await api('POST', '/api/chat/send', payload);
+  }
+}
+
+// ── Logout ────────────────────────────────────────────────
+function logout() {
+  clearAuth();
+  window.location.href = 'login.html';
+}
+
+// ── Init ──────────────────────────────────────────────────
+loadCourses();
+</script>
+</body>
+</html>

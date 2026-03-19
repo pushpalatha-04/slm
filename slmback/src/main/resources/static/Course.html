@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course - SLM</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0f1117;
+      --surface: #1a1d27;
+      --surface2:#22263a;
+      --border:  #2e3248;
+      --accent:  #7c6af7;
+      --accent2: #4fd1c5;
+      --danger:  #f56565;
+      --success: #68d391;
+      --warning: #f6ad55;
+      --text:    #e2e8f0;
+      --muted:   #718096;
+      --mono:    'JetBrains Mono', monospace;
+      --sans:    'Sora', sans-serif;
+      --body:    'Inter', sans-serif;
+      --sw:      258px;
+    }
+
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top bar ── */
+    .top-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      height: 54px;
+      display: flex; align-items: center;
+      padding: 0 20px; gap: 14px;
+      flex-shrink: 0; position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: var(--sans); font-weight: 700; font-size: 1.1rem; color: var(--accent); }
+    .course-badge {
+      padding: 4px 14px; border-radius: 20px;
+      font-size: .82rem; font-weight: 600; color: #fff;
+    }
+    .back-link {
+      margin-left: auto; color: var(--muted); text-decoration: none;
+      font-size: .82rem; border: 1px solid var(--border);
+      padding: 5px 13px; border-radius: 6px; transition: all .2s;
+    }
+    .back-link:hover { color: var(--text); border-color: var(--accent); }
+
+    /* ── Layout ── */
+    .layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sw);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow-y: auto; flex-shrink: 0;
+    }
+    .sb-sec   { padding: 16px 0 6px; }
+    .sb-lbl   {
+      font-size: .67rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: rgba(255,255,255,.28);
+      padding: 0 16px 8px;
+    }
+    .sb-item  {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 16px; cursor: pointer;
+      font-size: .84rem; color: var(--muted);
+      border-left: 3px solid transparent; transition: all .15s;
+    }
+    .sb-item:hover  { background: rgba(255,255,255,.05); color: var(--text); }
+    .sb-item.active { background: rgba(124,106,247,.12); color: var(--text); border-left-color: var(--accent); }
+    .sb-item.locked { opacity: .35; cursor: not-allowed; pointer-events: none; }
+    .sb-item.done   { color: rgba(255,255,255,.7); }
+    .sb-icon  { font-size: .95rem; flex-shrink: 0; }
+    .sb-name  { flex: 1; }
+    .sb-badge {
+      font-size: .65rem; padding: 2px 8px; border-radius: 10px;
+      background: var(--surface2); color: var(--muted);
+    }
+
+    .sb-footer {
+      margin-top: auto;
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+    }
+    .sb-prog-row { display: flex; justify-content: space-between; font-size: .72rem; color: var(--muted); margin-bottom: 6px; }
+    .sb-prog-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .sb-prog-fill { height: 100%; background: var(--success); border-radius: 2px; transition: width .5s; }
+
+    /* ── Main ── */
+    .main { flex: 1; overflow-y: auto; padding: 30px 32px; }
+
+    .panel       { display: none; }
+    .panel.active{ display: block; }
+    .panel-title { font-family: var(--sans); font-size: 1.35rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .panel-sub   { font-size: .88rem; color: var(--muted); margin-bottom: 26px; line-height: 1.6; }
+
+    /* ── VIDEO LIST ── */
+    .video-list { display: flex; flex-direction: column; gap: 10px; max-width: 800px; }
+    .video-row  {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 18px; transition: all .2s;
+    }
+    .video-row:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(124,106,247,.15); }
+    .video-row.watched { border-color: var(--success); background: rgba(104,211,145,.06); }
+    .v-num {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .v-info   { flex: 1; }
+    .v-title  { font-size: .9rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .v-desc   { font-size: .78rem; color: var(--muted); }
+    .v-status { font-size: 1.1rem; }
+    .v-btn    {
+      padding: 7px 16px; border-radius: 7px; border: none;
+      font-size: .79rem; font-weight: 600; color: #fff;
+      cursor: pointer; flex-shrink: 0; transition: filter .2s;
+    }
+    .v-btn:hover { filter: brightness(1.12); }
+
+    /* ── EDITOR (practice + assignment) ── */
+    .editor-wrap { max-width: 860px; }
+    .editor-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-bottom: 16px;
+    }
+    .editor-topbar {
+      background: var(--surface2); padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .editor-topbar span { font-size: .78rem; color: var(--muted); font-family: var(--mono); }
+    .run-btn {
+      padding: 5px 16px; background: var(--success); color: #1a2e20;
+      border: none; border-radius: 6px; font-size: .78rem; font-weight: 600;
+      cursor: pointer; transition: filter .2s;
+    }
+    .run-btn:hover { filter: brightness(1.1); }
+    .code-area {
+      width: 100%; min-height: 220px;
+      background: var(--bg); color: var(--text);
+      font-family: var(--mono); font-size: 13px; line-height: 1.7;
+      border: none; outline: none; padding: 16px 20px;
+      resize: vertical; tab-size: 4;
+    }
+    .code-area:focus { background: #0c0f1d; }
+    .out-bar { border-top: 1px solid var(--border); }
+    .out-lbl { padding: 5px 16px; font-size: .72rem; color: var(--muted); background: #0a0d17; font-family: var(--mono); }
+    .out-box {
+      min-height: 60px; padding: 12px 20px;
+      font-family: var(--mono); font-size: 13px;
+      background: #0a0d17; white-space: pre-wrap; word-break: break-word;
+    }
+    .done-btn {
+      padding: 10px 26px; border: none; border-radius: 8px;
+      font-family: var(--sans); font-size: .9rem; font-weight: 600;
+      color: #fff; cursor: pointer; transition: filter .2s;
+    }
+    .done-btn:hover { filter: brightness(1.1); }
+
+    /* ── QUIZ / ASSESSMENT shared ── */
+    .start-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 36px; max-width: 500px; text-align: center;
+    }
+    .start-card h2 { font-family: var(--sans); font-size: 1.25rem; margin-bottom: 10px; }
+    .start-card p  { color: var(--muted); font-size: .9rem; margin-bottom: 22px; line-height: 1.6; }
+    .meta-row { display: flex; justify-content: center; gap: 28px; margin-bottom: 26px; }
+    .meta-box { text-align: center; font-size: .8rem; color: var(--muted); }
+    .meta-box b { display: block; font-size: 1.2rem; color: var(--text); font-family: var(--sans); }
+    .start-btn {
+      padding: 11px 34px; border: none; border-radius: 8px;
+      font-family: var(--sans); font-size: .95rem; font-weight: 600;
+      color: #fff; cursor: pointer; transition: filter .2s;
+    }
+    .start-btn:hover { filter: brightness(1.1); }
+
+    .q-area { display: none; }
+    .timer-bar {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 18px; margin-bottom: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .timer-bar span { font-size: .85rem; color: var(--muted); }
+    .timer-num {
+      font-family: var(--sans); font-size: 1.2rem; font-weight: 700; color: var(--accent);
+    }
+    .timer-num.danger { color: var(--danger); animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .q-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px; margin-bottom: 12px;
+    }
+    .q-card h3 { font-size: .92rem; margin-bottom: 12px; line-height: 1.6; color: var(--text); }
+    .q-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 13px; border-radius: 7px; margin-bottom: 7px;
+      border: 1.5px solid var(--border); cursor: pointer; font-size: .88rem;
+      transition: all .15s; color: var(--text);
+    }
+    .q-opt:hover   { border-color: var(--accent); background: rgba(124,106,247,.08); }
+    .q-opt input   { accent-color: var(--accent); }
+    .q-opt.correct { background: rgba(104,211,145,.1); border-color: var(--success) !important; color: var(--success); }
+    .q-opt.wrong   { background: rgba(245,101,101,.1); border-color: var(--danger)  !important; color: var(--danger); }
+
+    .submit-btn {
+      padding: 10px 30px; border: none; border-radius: 8px;
+      font-family: var(--sans); font-size: .9rem; font-weight: 600;
+      color: #fff; cursor: pointer; margin-top: 6px; transition: filter .2s;
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+
+    /* Result */
+    .result-area { display: none; }
+    .score-banner {
+      padding: 26px; border-radius: 12px; text-align: center;
+      color: #fff; margin-bottom: 18px;
+    }
+    .score-banner .big { font-family: var(--sans); font-size: 2.8rem; font-weight: 700; }
+    .score-banner .lbl { opacity: .88; margin-top: 4px; font-size: .95rem; }
+    .stats-row { display: flex; gap: 12px; margin-bottom: 18px; }
+    .stat { flex:1; text-align:center; padding:13px; border-radius:8px; font-size:.82rem; }
+    .stat b { display:block; font-size:1.3rem; margin-bottom:3px; }
+    .stat.c { background:rgba(104,211,145,.12); color:var(--success); }
+    .stat.w { background:rgba(245,101,101,.12); color:var(--danger); }
+    .stat.s { background:rgba(246,173,85,.12);  color:var(--warning); }
+
+    /* ── ASSESSMENT ── */
+    .locked-card {
+      background: var(--surface); border: 2px dashed var(--border);
+      border-radius: 14px; padding: 44px; text-align: center; max-width: 500px;
+    }
+    .locked-card .lock-ico { font-size: 3rem; margin-bottom: 14px; }
+    .locked-card h2 { font-family: var(--sans); font-size: 1.15rem; margin-bottom: 10px; color: var(--text); }
+    .locked-card p  { color: var(--muted); font-size: .88rem; line-height: 1.65; }
+    .checklist { text-align: left; margin: 18px 0; display: flex; flex-direction: column; gap: 9px; }
+    .ck-item  { display: flex; align-items: center; gap: 10px; font-size: .86rem; color: var(--muted); }
+    .ck-item.done { color: var(--success); }
+
+    /* ── CERTIFICATE ── */
+    .cert-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 32px; max-width: 500px; text-align: center; margin-top: 20px;
+    }
+    .cert-card h2 { font-family: var(--sans); font-size: 1.2rem; margin-bottom: 10px; color: var(--text); }
+    .cert-card p  { color: var(--muted); font-size: .88rem; margin-bottom: 18px; line-height: 1.6; }
+    .cert-input {
+      width: 100%; padding: 10px 14px;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: .9rem; color: var(--text);
+      font-family: var(--body); outline: none; margin-bottom: 14px;
+    }
+    .cert-input:focus { border-color: var(--accent); }
+    .cert-btn {
+      padding: 11px 30px; border: none; border-radius: 8px;
+      font-family: var(--sans); font-size: .9rem; font-weight: 600;
+      color: #fff; cursor: pointer; transition: filter .2s;
+    }
+    .cert-btn:hover { filter: brightness(1.1); }
+
+    #certCanvas { display: none; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 700px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; }
+      .sb-sec  { display: flex; padding: 8px; gap: 4px; }
+      .sb-lbl  { display: none; }
+      .sb-footer { display: none; }
+      .main { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <div class="logo">SLM</div>
+  <span class="course-badge" id="courseBadge"></span>
+  <a href="courses.html" class="back-link">← Courses</a>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sb-sec">
+      <div class="sb-lbl">Course Content</div>
+      <div class="sb-item active" id="nav-videos"     onclick="showPanel('videos')">
+        <span class="sb-icon">📹</span><span class="sb-name">Video Lessons</span>
+        <span class="sb-badge" id="badge-videos">0/10</span>
+      </div>
+      <div class="sb-item"        id="nav-practice"   onclick="showPanel('practice')">
+        <span class="sb-icon">💻</span><span class="sb-name">Practice Code</span>
+        <span class="sb-badge" id="badge-practice">—</span>
+      </div>
+      <div class="sb-item"        id="nav-quiz"       onclick="showPanel('quiz')">
+        <span class="sb-icon">🧠</span><span class="sb-name">Quiz</span>
+        <span class="sb-badge" id="badge-quiz">—</span>
+      </div>
+      <div class="sb-item"        id="nav-assignment" onclick="showPanel('assignment')">
+        <span class="sb-icon">📝</span><span class="sb-name">Assignment</span>
+        <span class="sb-badge" id="badge-assignment">—</span>
+      </div>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-lbl">Final</div>
+      <div class="sb-item locked" id="nav-assessment" onclick="showPanel('assessment')">
+        <span class="sb-icon">🏆</span><span class="sb-name">Main Assessment</span>
+        <span style="font-size:.8rem;opacity:.45">🔒</span>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <div class="sb-prog-row"><span>Overall Progress</span><span id="overall-pct">0%</span></div>
+      <div class="sb-prog-bar"><div class="sb-prog-fill" id="overall-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+
+    <!-- ══ VIDEOS ══ -->
+    <div class="panel active" id="panel-videos">
+      <div class="panel-title">📹 Video Lessons</div>
+      <div class="panel-sub">Click Watch — video opens directly on YouTube. Mark each one done to track progress.</div>
+      <div class="video-list" id="videoList"></div>
+    </div>
+
+    <!-- ══ PRACTICE ══ -->
+    <div class="panel" id="panel-practice">
+      <div class="panel-title">💻 Practice Code</div>
+      <div class="panel-sub" id="practiceSub">Write and run code. Executed via Gemini AI through your Spring Boot backend.</div>
+      <div class="editor-wrap">
+        <div class="editor-card">
+          <div class="editor-topbar">
+            <span id="practiceLang">python</span>
+            <button class="run-btn" onclick="runCode('practiceEditor','practiceOut')">▶ Run</button>
+          </div>
+          <textarea class="code-area" id="practiceEditor" spellcheck="false"></textarea>
+          <div class="out-bar">
+            <div class="out-lbl">output</div>
+            <div class="out-box" id="practiceOut" style="color:var(--muted);font-style:italic">// Output appears here...</div>
+          </div>
+        </div>
+        <button class="done-btn" id="practiceDoneBtn" onclick="markDone('prac')">✅ Mark Practice Complete</button>
+      </div>
+    </div>
+
+    <!-- ══ QUIZ ══ -->
+    <div class="panel" id="panel-quiz">
+      <div id="quizStartCard" class="start-card">
+        <div style="font-size:2.4rem;margin-bottom:12px">🧠</div>
+        <h2 id="quizTitle">Course Quiz</h2>
+        <p>Test your understanding with 20 AI-generated questions. You have 30 minutes.</p>
+        <div class="meta-row">
+          <div class="meta-box"><b>20</b>Questions</div>
+          <div class="meta-box"><b>30</b>Minutes</div>
+          <div class="meta-box"><b>MCQ</b>Format</div>
+        </div>
+        <button class="start-btn" id="quizStartBtn" onclick="startQuiz()">Start Quiz</button>
+      </div>
+      <div class="q-area" id="quizArea">
+        <div class="timer-bar">
+          <span>Time remaining</span>
+          <span class="timer-num" id="quizTimer">30:00</span>
+        </div>
+        <div id="quizQWrap"></div>
+        <button class="submit-btn" id="quizSubmitBtn" onclick="submitQuiz()">Submit Quiz</button>
+      </div>
+      <div class="result-area" id="quizResult">
+        <div class="score-banner" id="quizBanner">
+          <div class="big" id="quizScoreNum">0/20</div>
+          <div class="lbl" id="quizScoreLbl">Quiz Complete!</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat c"><b id="qC">0</b>Correct ✅</div>
+          <div class="stat w"><b id="qW">0</b>Wrong ❌</div>
+          <div class="stat s"><b id="qS">0</b>Skipped ⏭</div>
+        </div>
+        <button class="start-btn" id="quizRetryBtn" onclick="retryQuiz()" style="padding:9px 26px;font-size:.87rem">🔄 Retake Quiz</button>
+      </div>
+    </div>
+
+    <!-- ══ ASSIGNMENT ══ -->
+    <div class="panel" id="panel-assignment">
+      <div class="panel-title">📝 Assignment</div>
+      <div class="panel-sub">Complete the task below, run your code, then submit.</div>
+      <div class="editor-wrap">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px">
+          <h3 style="font-family:var(--sans);font-size:.97rem;margin-bottom:7px;color:var(--text)" id="assignTitle"></h3>
+          <p style="font-size:.87rem;color:var(--muted);line-height:1.7" id="assignDesc"></p>
+        </div>
+        <div class="editor-card">
+          <div class="editor-topbar">
+            <span id="assignLang">python</span>
+            <button class="run-btn" onclick="runCode('assignEditor','assignOut')">▶ Run</button>
+          </div>
+          <textarea class="code-area" id="assignEditor" spellcheck="false"></textarea>
+          <div class="out-bar">
+            <div class="out-lbl">output</div>
+            <div class="out-box" id="assignOut" style="color:var(--muted);font-style:italic">// Output appears here...</div>
+          </div>
+        </div>
+        <button class="done-btn" id="assignDoneBtn" onclick="markDone('assign')">✅ Submit Assignment</button>
+      </div>
+    </div>
+
+    <!-- ══ ASSESSMENT ══ -->
+    <div class="panel" id="panel-assessment">
+      <!-- Locked -->
+      <div id="assessLocked">
+        <div class="panel-title">🏆 Main Assessment</div>
+        <div class="panel-sub">Complete all sections to unlock the final assessment.</div>
+        <div class="locked-card">
+          <div class="lock-ico">🔒</div>
+          <h2>Assessment Locked</h2>
+          <p>Complete all of the following first:</p>
+          <div class="checklist">
+            <div class="ck-item" id="ck-videos">  <span>⬜</span> Watch all 10 video lessons</div>
+            <div class="ck-item" id="ck-practice"><span>⬜</span> Complete practice code</div>
+            <div class="ck-item" id="ck-quiz">    <span>⬜</span> Complete the quiz</div>
+            <div class="ck-item" id="ck-assign">  <span>⬜</span> Submit assignment</div>
+          </div>
+        </div>
+      </div>
+      <!-- Unlocked -->
+      <div id="assessUnlocked" style="display:none">
+        <div class="panel-title">🏆 Main Assessment</div>
+        <div class="panel-sub">Score 75% or above to earn your certificate of completion.</div>
+        <div id="assessStartCard" class="start-card">
+          <div style="font-size:2.4rem;margin-bottom:12px">🎯</div>
+          <h2>Final Assessment</h2>
+          <p>Score <b>75% or above (15/20)</b> to earn your certificate. You may retake if needed.</p>
+          <div class="meta-row">
+            <div class="meta-box"><b>20</b>Questions</div>
+            <div class="meta-box"><b>30</b>Min</div>
+            <div class="meta-box"><b>75%</b>Pass</div>
+          </div>
+          <button class="start-btn" id="assessStartBtn" onclick="startAssessment()">Begin Assessment</button>
+        </div>
+        <div class="q-area" id="assessArea">
+          <div class="timer-bar">
+            <span>Time remaining</span>
+            <span class="timer-num" id="assessTimer">30:00</span>
+          </div>
+          <div id="assessQWrap"></div>
+          <button class="submit-btn" id="assessSubmitBtn" onclick="submitAssessment()">Submit Assessment</button>
+        </div>
+        <div class="result-area" id="assessResult">
+          <div class="score-banner" id="assessBanner">
+            <div class="big" id="assessScoreNum">0/20</div>
+            <div class="lbl" id="assessScoreLbl">Assessment Complete</div>
+          </div>
+          <div class="stats-row">
+            <div class="stat c"><b id="aC">0</b>Correct</div>
+            <div class="stat w"><b id="aW">0</b>Wrong</div>
+            <div class="stat s"><b id="aS">0</b>Skipped</div>
+          </div>
+          <div id="certSection" style="display:none">
+            <div class="cert-card">
+              <div style="font-size:2.4rem;margin-bottom:10px">🎓</div>
+              <h2>You Passed! Congratulations!</h2>
+              <p>Enter your name to generate and download your certificate.</p>
+              <input class="cert-input" id="certName" type="text" placeholder="Enter your full name...">
+              <button class="cert-btn" id="certBtn" onclick="downloadCert()">📄 Download Certificate</button>
+            </div>
+          </div>
+          <div id="failSection" style="display:none;margin-top:14px">
+            <p style="color:var(--danger);margin-bottom:12px;font-size:.9rem">You need 75% to pass. Keep practising!</p>
+            <button class="start-btn" onclick="retryAssessment()" style="padding:9px 26px;font-size:.87rem">🔄 Retake Assessment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<canvas id="certCanvas"></canvas>
+
+<script>
+// ── Course data — DIRECT YouTube links ─────────────────────
+const COURSES = {
+  java: {
+    name: 'Java Programming', color: '#f97316', lang: 'java', tag: '☕ Java',
+    videos: [
+      { title: '#1 Java Introduction',               desc: 'Telusko — What is Java, history, features',              url: 'https://www.youtube.com/watch?v=bm0OyhwFDuY&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=1' },
+      { title: '#5 Variables in Java',               desc: 'Telusko — Variables, naming rules, declaration',         url: 'https://www.youtube.com/watch?v=Oo4gBZEEQhI&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=5' },
+      { title: '#12 If else in Java',                desc: 'Telusko — if, else if, ternary, switch',                 url: 'https://www.youtube.com/watch?v=zmrzUCiDtEc&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=12' },
+      { title: '#17 While Loop in Java',             desc: 'Telusko — while, do-while, for loop',                    url: 'https://www.youtube.com/watch?v=hz_qsXCXZCY&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=17' },
+      { title: '#21 Class And Object Theory',        desc: 'Telusko — OOP concepts, class, object',                  url: 'https://www.youtube.com/watch?v=BSVKUk58K6U&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=21' },
+      { title: '#47 Need of Inheritance in Java',    desc: 'Telusko — Inheritance, extends, super keyword',          url: 'https://www.youtube.com/watch?v=oUnL10y2gKU&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=47' },
+      { title: '#27 Need of an Array in Java',       desc: 'Telusko — Arrays, creation, multi-dimensional',         url: 'https://www.youtube.com/watch?v=fOBDMBpIhXQ&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=27' },
+      { title: '#76 What is Exception in Java',      desc: 'Telusko — try, catch, finally, throw, throws',          url: 'https://www.youtube.com/watch?v=W-N2ltgU-X4&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=76' },
+      { title: '#91 Collection API in Java',         desc: 'Telusko — ArrayList, Set, Map, Comparator',             url: 'https://www.youtube.com/watch?v=rzA7UJ-hQoI&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=91' },
+      { title: '#85 Threads in Java',                desc: 'Telusko — Thread, Runnable, race condition',            url: 'https://www.youtube.com/watch?v=TCd8QIS-2KI&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=85' },
+    ],
+    practiceCode: `// Java Practice: Check if a number is prime
+public class Main {
+    public static boolean isPrime(int n) {
+        if (n < 2) return false;
+        for (int i = 2; i <= Math.sqrt(n); i++)
+            if (n % i == 0) return false;
+        return true;
+    }
+    public static void main(String[] args) {
+        System.out.println(isPrime(7));   // true
+        System.out.println(isPrime(10));  // false
+    }
+}`,
+    assignment: {
+      title: 'Student Grade Calculator',
+      desc: 'Create a Java program with marks[] = {85, 90, 45, 78, 62}. Calculate the average and print "Pass" if average >= 50 or "Fail" otherwise.',
+      starter: `public class Main {
+    public static void main(String[] args) {
+        int[] marks = {85, 90, 45, 78, 62};
+        // Calculate average and print Pass/Fail
+    }
+}`
+    }
+  },
+  dbms: {
+    name: 'Database Management', color: '#38bdf8', lang: 'sql', tag: '🗄️ DBMS',
+    videos: [
+      { title: 'Introduction to SQL',                desc: 'Telusko SQL — What is SQL, RDBMS basics',              url: 'https://www.youtube.com/watch?v=HXV3zeQKqGY&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=1' },
+      { title: 'Create Table and Insert',            desc: 'Telusko SQL — CREATE TABLE, INSERT INTO syntax',       url: 'https://www.youtube.com/watch?v=dHV5jOEAFks&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=2' },
+      { title: 'Select Query in SQL',                desc: 'Telusko SQL — SELECT, WHERE, ORDER BY, DISTINCT',      url: 'https://www.youtube.com/watch?v=e1sFTEBtCb0&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=3' },
+      { title: 'Update and Delete in SQL',           desc: 'Telusko SQL — UPDATE, DELETE, WHERE clause',           url: 'https://www.youtube.com/watch?v=z5TKmHLKV-I&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=4' },
+      { title: 'Aggregate Functions in SQL',         desc: 'Telusko SQL — COUNT, SUM, AVG, MIN, MAX',              url: 'https://www.youtube.com/watch?v=0AJoFkCFcF4&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=5' },
+      { title: 'Group By in SQL',                    desc: 'Telusko SQL — GROUP BY, HAVING clause',               url: 'https://www.youtube.com/watch?v=_L9cjxCnMqE&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=6' },
+      { title: 'Joins in SQL',                       desc: 'Telusko SQL — INNER, LEFT, RIGHT, FULL JOIN',         url: 'https://www.youtube.com/watch?v=2HVMiPPuPIM&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=7' },
+      { title: 'Sub Queries in SQL',                 desc: 'Telusko SQL — Nested queries, correlated subquery',   url: 'https://www.youtube.com/watch?v=sQhNFSmDMDs&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=8' },
+      { title: 'Views in SQL',                       desc: 'Telusko SQL — CREATE VIEW, virtual tables',           url: 'https://www.youtube.com/watch?v=QE7s1Sj0W0E&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=9' },
+      { title: 'Normalization in SQL',               desc: 'Telusko SQL — 1NF, 2NF, 3NF, BCNF explained',        url: 'https://www.youtube.com/watch?v=xoTyrdT9SZI&list=PLsyeobzWxl7oBxla6GhOFTHpxlb0Adn2u&index=10' },
+    ],
+    practiceCode: `-- SQL Practice: Students above average score
+CREATE TABLE students (id INT, name TEXT, score INT);
+INSERT INTO students VALUES (1,'Alice',88),(2,'Bob',55),(3,'Carol',72),(4,'Dave',91),(5,'Eve',60);
+
+SELECT name, score FROM students
+WHERE score > (SELECT AVG(score) FROM students)
+ORDER BY score DESC;`,
+    assignment: {
+      title: 'Library Database',
+      desc: 'Create a books table (id, title, author, year, available). Insert 3 books. Query all available books sorted by year DESC.',
+      starter: `-- Create books table and insert 3 records
+-- Then write your SELECT query below
+`
+    }
+  },
+  dsa: {
+    name: 'Data Structures & Algorithms', color: '#10b981', lang: 'java', tag: '🌳 DSA',
+    videos: [
+      { title: 'Introduction to DSA',            desc: 'Why DSA, Big O time complexity',        url: 'https://www.youtube.com/watch?v=rZ41y93P2Qo' },
+      { title: 'Arrays & Strings',               desc: 'Array ops, two pointers, sliding window',url: 'https://www.youtube.com/watch?v=n60Dn0UsbEk' },
+      { title: 'Linked Lists',                   desc: 'Singly, doubly, circular linked list',  url: 'https://www.youtube.com/watch?v=oAja8-Ulhyw' },
+      { title: 'Stacks & Queues',                desc: 'LIFO, FIFO, push, pop, enqueue',        url: 'https://www.youtube.com/watch?v=GYptUgnIM_I' },
+      { title: 'Recursion',                      desc: 'Base case, call stack, backtracking',   url: 'https://www.youtube.com/watch?v=kepBmgvWNDw' },
+      { title: 'Sorting Algorithms',             desc: 'Bubble, merge, quick, insertion sort',  url: 'https://www.youtube.com/watch?v=HGk_ypEuS24' },
+      { title: 'Searching Algorithms',           desc: 'Linear search, binary search',          url: 'https://www.youtube.com/watch?v=LmpAntNjPj0' },
+      { title: 'Trees & Binary Trees',           desc: 'BST, inorder, preorder, postorder',     url: 'https://www.youtube.com/watch?v=4s1Tcvm00pA' },
+      { title: 'Heaps & Hashing',                desc: 'Min/max heap, hash tables, collisions', url: 'https://www.youtube.com/watch?v=0fcTgMi2tK0' },
+      { title: 'Graphs — BFS & DFS',             desc: 'Graph traversals, shortest path',       url: 'https://www.youtube.com/watch?v=gXgEDyodOJU' },
+    ],
+    practiceCode: `// DSA Practice: Binary Search in Java
+public class Main {
+    public static int binarySearch(int[] arr, int target) {
+        int left = 0, right = arr.length - 1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (arr[mid] == target) return mid;
+            else if (arr[mid] < target) left = mid + 1;
+            else right = mid - 1;
+        }
+        return -1;
+    }
+    public static void main(String[] args) {
+        int[] arr = {1, 3, 5, 7, 9, 11, 13};
+        System.out.println(binarySearch(arr, 7));   // 3
+        System.out.println(binarySearch(arr, 6));   // -1
+    }
+}`,
+    assignment: {
+      title: 'Implement a Stack',
+      desc: 'Implement a Stack class in Java with push(), pop(), peek(), isEmpty() methods. Use it to check balanced parentheses: "(())" → true, "(()" → false.',
+      starter: `import java.util.Stack;
+
+public class Main {
+    public static boolean isBalanced(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (char c : s.toCharArray()) {
+            if (c == '(') stack.push(c);
+            else if (c == ')') {
+                if (stack.isEmpty()) return false;
+                stack.pop();
+            }
+        }
+        return stack.isEmpty();
+    }
+    public static void main(String[] args) {
+        System.out.println(isBalanced("(())"));  // true
+        System.out.println(isBalanced("(()"));   // false
+    }
+}`
+    }
+  },
+  webdev: {
+    name: 'Web Development', color: '#8b5cf6', lang: 'java', tag: '🌐 Web Dev',
+    videos: [
+      { title: '#1 Java Introduction',               desc: 'Telusko — What is Java, JVM, first program',           url: 'https://www.youtube.com/watch?v=bm0OyhwFDuY&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=1' },
+      { title: '#3 First Code in Java',              desc: 'Telusko — Writing and running first Java program',      url: 'https://www.youtube.com/watch?v=nQ5ZVJqXFr0&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=3' },
+      { title: '#5 Variables in Java',               desc: 'Telusko — Variables, data types, literals',            url: 'https://www.youtube.com/watch?v=Oo4gBZEEQhI&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=5' },
+      { title: '#9 Arithmetic Operators in Java',    desc: 'Telusko — Operators, expressions, type conversion',    url: 'https://www.youtube.com/watch?v=T3n_6bQwvHg&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=9' },
+      { title: '#12 If else in Java',                desc: 'Telusko — if, else if, else, ternary operator',        url: 'https://www.youtube.com/watch?v=zmrzUCiDtEc&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=12' },
+      { title: '#19 For Loop in Java',               desc: 'Telusko — for loop, while loop, do-while',             url: 'https://www.youtube.com/watch?v=hz_qsXCXZCY&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=19' },
+      { title: '#22 Class and Object Practical',     desc: 'Telusko — Creating classes, objects in Java',          url: 'https://www.youtube.com/watch?v=BSVKUk58K6U&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=22' },
+      { title: '#24 Methods in Java',                desc: 'Telusko — Defining methods, return types, overloading', url: 'https://www.youtube.com/watch?v=vvanI8NRlSI&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=24' },
+      { title: '#34 What is String in Java',         desc: 'Telusko — Strings, mutable vs immutable, StringBuilder', url: 'https://www.youtube.com/watch?v=qrqNQrGxoGs&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=34' },
+      { title: '#40 Encapsulation in Java',          desc: 'Telusko — Encapsulation, getters, setters, this keyword', url: 'https://www.youtube.com/watch?v=TP8ZBrCBGAs&list=PLsyeobzWxl7pe_IiTfNyr55kwJPWbgxB5&index=40' },
+    ],
+    practiceCode: `// Web Dev Practice: Form Validation Logic in Java
+public class Main {
+    public static boolean validateEmail(String email) {
+        return email.contains("@") && email.contains(".");
+    }
+
+    public static boolean validatePassword(String pwd) {
+        return pwd.length() >= 8;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(validateEmail("user@example.com")); // true
+        System.out.println(validateEmail("bad-email"));        // false
+        System.out.println(validatePassword("pass123"));       // false
+        System.out.println(validatePassword("securepass"));    // true
+    }
+}`,
+    assignment: {
+      title: 'To-Do List Manager',
+      desc: 'Write a Java program with an ArrayList to manage tasks. Implement add, remove and display functionality. Add 3 tasks, remove 1, then print the remaining tasks.',
+      starter: `import java.util.ArrayList;
+
+public class Main {
+    static ArrayList<String> tasks = new ArrayList<>();
+
+    public static void addTask(String task) {
+        // your code
+    }
+
+    public static void removeTask(String task) {
+        // your code
+    }
+
+    public static void showTasks() {
+        // your code
+    }
+
+    public static void main(String[] args) {
+        addTask("Learn HTML");
+        addTask("Build a form");
+        addTask("Style with CSS");
+        removeTask("Build a form");
+        showTasks();
+    }
+}`
+    }
+  }
+};
+
+// ── Init ────────────────────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+const key    = params.get('course') || 'java';
+const C      = COURSES[key] || COURSES.java;
+const SKEY   = 'slm_progress_' + key;
+let   P      = JSON.parse(localStorage.getItem(SKEY) || '{}');
+if (!P.videos) P.videos = [];
+
+// Theme color
+document.documentElement.style.setProperty('--accent', C.color);
+document.title = C.name + ' - SLM';
+
+// Badge
+const badge = document.getElementById('courseBadge');
+badge.textContent = C.tag;
+badge.style.background = C.color;
+
+// Populate quiz/assess buttons color
+['quizStartBtn','quizRetryBtn','quizSubmitBtn',
+ 'assessStartBtn','assessSubmitBtn',
+ 'practiceDoneBtn','assignDoneBtn','certBtn'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.style.background = C.color;
+});
+
+// Populate editors
+document.getElementById('practiceLang').textContent = C.lang;
+document.getElementById('assignLang').textContent   = C.lang;
+document.getElementById('practiceEditor').value = C.practiceCode;
+document.getElementById('assignEditor').value   = C.assignment.starter;
+document.getElementById('assignTitle').textContent  = C.assignment.title;
+document.getElementById('assignDesc').textContent   = C.assignment.desc;
+document.getElementById('quizTitle').textContent    = C.name + ' Quiz';
+
+// ── Video list ────────────────────────────────────────────
+function buildVideos() {
+  const list = document.getElementById('videoList');
+  list.innerHTML = '';
+  C.videos.forEach((v, i) => {
+    const watched = P.videos.includes(i);
+    const row = document.createElement('div');
+    row.className = 'video-row' + (watched ? ' watched' : '');
+    row.innerHTML = `
+      <div class="v-num" style="background:${C.color}">${i+1}</div>
+      <div class="v-info">
+        <div class="v-title">${v.title}</div>
+        <div class="v-desc">${v.desc}</div>
+      </div>
+      <div class="v-status">${watched ? '✅' : '▶️'}</div>
+      <button class="v-btn" style="background:${C.color}" onclick="watchVideo(${i})">
+        ${watched ? 'Rewatch' : 'Watch'}
+      </button>`;
+    list.appendChild(row);
+  });
+  refreshProgress();
+}
+
+function watchVideo(i) {
+  // Mark as watched
+  if (!P.videos.includes(i)) {
+    P.videos.push(i);
+    save();
+    buildVideos();
+  }
+  // Open YouTube directly — no search, no popup dialog
+  window.open(C.videos[i].url, '_blank', 'noopener,noreferrer');
+}
+
+// ── Run code ──────────────────────────────────────────────
+async function runCode(editorId, outId) {
+  const code  = document.getElementById(editorId).value.trim();
+  const outEl = document.getElementById(outId);
+  if (!code) return;
+  outEl.style.color   = 'var(--accent2)';
+  outEl.style.fontStyle = 'normal';
+  outEl.textContent   = '⏳ Running via Gemini AI...';
+  try {
+    const res  = await fetch('http://localhost:8080/api/code/run', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, language: C.lang, stdin: '' })
+    });
+    const data = await res.json();
+    if (data.stderr && !data.stdout) {
+      outEl.style.color = 'var(--danger)';
+      outEl.textContent = data.stderr;
+    } else {
+      outEl.style.color = 'var(--success)';
+      outEl.textContent = data.stdout || '(no output)';
+    }
+  } catch {
+    outEl.style.color = 'var(--danger)';
+    outEl.textContent = '⚠️ Could not reach backend. Make sure Spring Boot is running on localhost:8080';
+  }
+}
+
+// ── Mark done ─────────────────────────────────────────────
+function markDone(type) {
+  if (type === 'prac')   P.pracDone   = true;
+  if (type === 'assign') P.assignDone = true;
+  save(); refreshProgress();
+  alert('✅ ' + (type === 'prac' ? 'Practice' : 'Assignment') + ' marked complete!');
+}
+
+// ── Quiz ──────────────────────────────────────────────────
+let quizQs = [], quizTmr = null, quizDone = false;
+
+async function startQuiz() {
+  document.getElementById('quizStartCard').style.display = 'none';
+  document.getElementById('quizResult').style.display    = 'none';
+  document.getElementById('quizArea').style.display      = 'block';
+  document.getElementById('quizQWrap').innerHTML =
+    `<p style="color:var(--muted);padding:16px">⏳ Generating quiz with Gemini AI...</p>`;
+  try {
+    const res  = await fetch('http://localhost:8080/api/quiz/generate?course=' + encodeURIComponent(C.name));
+    const data = await res.json();
+    if (!data || !data.length) throw new Error('No questions returned');
+    quizQs = data; quizDone = false;
+    renderQs(data, 'quizQWrap', 'q');
+    startTimer('quizTimer', () => submitQuiz());
+  } catch(e) {
+    document.getElementById('quizQWrap').innerHTML =
+      `<p style="color:var(--danger);padding:16px">⚠️ Could not load quiz. ${e.message}</p>`;
+  }
+}
+
+function submitQuiz() {
+  if (quizDone) return; quizDone = true; clearInterval(quizTmr);
+  const {c,w,s} = evalQs(quizQs, 'q');
+  P.quizDone = true; P.quizScore = c; save(); refreshProgress();
+  showResult('quizArea','quizResult','quizBanner','quizScoreNum','quizScoreLbl','qC','qW','qS', c,w,s,quizQs.length);
+}
+
+function retryQuiz() {
+  quizDone = false;
+  document.getElementById('quizResult').style.display    = 'none';
+  document.getElementById('quizStartCard').style.display = 'block';
+}
+
+// ── Assessment ────────────────────────────────────────────
+let assessQs = [], assessTmr = null, assessDone = false;
+
+async function startAssessment() {
+  document.getElementById('assessStartCard').style.display = 'none';
+  document.getElementById('assessResult').style.display    = 'none';
+  document.getElementById('assessArea').style.display      = 'block';
+  document.getElementById('assessQWrap').innerHTML =
+    `<p style="color:var(--muted);padding:16px">⏳ Generating final assessment...</p>`;
+  try {
+    const res  = await fetch('http://localhost:8080/api/quiz/generate?course=' + encodeURIComponent(C.name));
+    const data = await res.json();
+    if (!data || !data.length) throw new Error('No questions');
+    assessQs = data; assessDone = false;
+    renderQs(data, 'assessQWrap', 'a');
+    startTimer('assessTimer', () => submitAssessment());
+  } catch(e) {
+    document.getElementById('assessQWrap').innerHTML =
+      `<p style="color:var(--danger);padding:16px">⚠️ ${e.message}</p>`;
+  }
+}
+
+function submitAssessment() {
+  if (assessDone) return; assessDone = true; clearInterval(assessTmr);
+  const {c,w,s} = evalQs(assessQs,'a');
+  const pct = Math.round(c / assessQs.length * 100);
+  P.assessDone = true; P.assessScore = c; P.assessPass = pct >= 75;
+  save(); refreshProgress();
+  showResult('assessArea','assessResult','assessBanner','assessScoreNum','assessScoreLbl','aC','aW','aS', c,w,s,assessQs.length);
+  document.getElementById('certSection').style.display  = pct>=75 ? 'block' : 'none';
+  document.getElementById('failSection').style.display  = pct>=75 ? 'none'  : 'block';
+  if (pct>=75) document.getElementById('certBtn').style.background = C.color;
+}
+
+function retryAssessment() {
+  assessDone = false;
+  document.getElementById('assessResult').style.display    = 'none';
+  document.getElementById('assessStartCard').style.display = 'block';
+}
+
+// ── Shared quiz helpers ───────────────────────────────────
+function renderQs(data, wrapId, pfx) {
+  const wrap = document.getElementById(wrapId);
+  wrap.innerHTML = '';
+  data.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.innerHTML = `<h3>Q${i+1}. ${q.question}</h3>` +
+      ['A','B','C','D'].map(o =>
+        `<label class="q-opt" id="${pfx}-${i}-${o}">
+          <input type="radio" name="${pfx}-q${i}" value="${o}">
+          <span><b>${o})</b> ${q['option'+o]}</span>
+        </label>`).join('');
+    wrap.appendChild(card);
+  });
+}
+
+function evalQs(qs, pfx) {
+  let c=0,w=0,s=0;
+  qs.forEach((q,i) => {
+    const sel = document.querySelector(`input[name="${pfx}-q${i}"]:checked`);
+    ['A','B','C','D'].forEach(o => {
+      const lbl = document.getElementById(`${pfx}-${i}-${o}`);
+      if (!lbl) return;
+      lbl.querySelector('input').disabled = true;
+      if (o === q.correctAnswer) lbl.classList.add('correct');
+    });
+    if (!sel) s++;
+    else if (sel.value === q.correctAnswer) c++;
+    else { const l=document.getElementById(`${pfx}-${i}-${sel.value}`); if(l) l.classList.add('wrong'); w++; }
+  });
+  return {c,w,s};
+}
+
+function startTimer(displayId, onEnd) {
+  clearInterval(quizTmr); clearInterval(assessTmr);
+  let t = 1800;
+  const id = setInterval(() => {
+    t--;
+    const el = document.getElementById(displayId);
+    if (!el) { clearInterval(id); return; }
+    const m=Math.floor(t/60), s=t%60;
+    el.textContent = m+':'+(s<10?'0'+s:s);
+    if (t<=300) el.classList.add('danger');
+    if (t<=0)   { clearInterval(id); onEnd(); }
+  }, 1000);
+  if (displayId === 'quizTimer')   quizTmr  = id;
+  if (displayId === 'assessTimer') assessTmr = id;
+}
+
+function showResult(aId,rId,bId,nId,lId,cId,wId,sId, c,w,s,total) {
+  document.getElementById(aId).style.display = 'none';
+  document.getElementById(rId).style.display = 'block';
+  const pct = Math.round(c/total*100);
+  document.getElementById(nId).textContent = c+'/'+total;
+  document.getElementById(lId).textContent =
+    pct>=80?'🏆 Excellent!':pct>=60?'👍 Good job!':pct>=40?'📚 Keep studying!':'💪 Keep going! ('+pct+'%)';
+  document.getElementById(bId).style.background =
+    pct>=75 ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#7c6af7,#5046a5)';
+  document.getElementById(cId).textContent = c;
+  document.getElementById(wId).textContent = w;
+  document.getElementById(sId).textContent = s;
+}
+
+// ── Certificate ───────────────────────────────────────────
+function downloadCert() {
+  const name = document.getElementById('certName').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  const cv = document.getElementById('certCanvas');
+  cv.width = 900; cv.height = 630;
+  const ctx = cv.getContext('2d');
+
+  ctx.fillStyle = '#0f1117'; ctx.fillRect(0, 0, 900, 630);
+
+  // Outer border
+  ctx.strokeStyle = C.color; ctx.lineWidth = 10;
+  ctx.strokeRect(16, 16, 868, 598);
+  ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(26, 26, 848, 578);
+
+  // Header band
+  ctx.fillStyle = C.color; ctx.fillRect(16, 16, 868, 94);
+
+  // Header text
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 26px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('SMART LEARNING SYSTEM', 450, 56);
+  ctx.font = '15px Arial';
+  ctx.fillText('Certificate of Completion', 450, 90);
+
+  ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.font = '17px Arial';
+  ctx.fillText('This is to certify that', 450, 195);
+
+  ctx.font = 'bold 40px Arial'; ctx.fillStyle = C.color;
+  ctx.fillText(name, 450, 260);
+
+  ctx.strokeStyle = C.color; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(200,276); ctx.lineTo(700,276); ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.font = '17px Arial';
+  ctx.fillText('has successfully completed the course', 450, 320);
+
+  ctx.font = 'bold 28px Arial'; ctx.fillStyle = '#e2e8f0';
+  ctx.fillText(C.name, 450, 366);
+
+  ctx.font = '15px Arial'; ctx.fillStyle = 'rgba(255,255,255,.5)';
+  const pct = Math.round((P.assessScore||0)/20*100);
+  ctx.fillText('Final Score: ' + (P.assessScore||0) + '/20  (' + pct + '%)', 450, 406);
+  const date = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  ctx.fillText('Date of Completion: ' + date, 450, 444);
+
+  ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.fillRect(16, 546, 868, 68);
+  ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.font = '13px Arial';
+  ctx.fillText('SLM — Smart Learning Platform for Developers', 450, 590);
+
+  const a = document.createElement('a');
+  a.download = 'SLM_Certificate_' + name.replace(/\s+/g,'_') + '.png';
+  a.href = cv.toDataURL('image/png');
+  a.click();
+}
+
+// ── Panel navigation ──────────────────────────────────────
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('nav-'   + name).classList.add('active');
+  if (name === 'assessment') renderAssessState();
+}
+
+function renderAssessState() {
+  const all = P.videos.length >= C.videos.length && P.pracDone && P.quizDone && P.assignDone;
+  document.getElementById('assessLocked').style.display   = all ? 'none'  : 'block';
+  document.getElementById('assessUnlocked').style.display = all ? 'block' : 'none';
+  setCheck('ck-videos',   P.videos.length >= C.videos.length, 'Watch all 10 video lessons');
+  setCheck('ck-practice', !!P.pracDone,   'Complete practice code');
+  setCheck('ck-quiz',     !!P.quizDone,   'Complete the quiz');
+  setCheck('ck-assign',   !!P.assignDone, 'Submit assignment');
+}
+
+function setCheck(id, done, label) {
+  const el = document.getElementById(id);
+  el.className = 'ck-item' + (done ? ' done' : '');
+  el.innerHTML = `<span>${done?'✅':'⬜'}</span> ${label}`;
+}
+
+// ── Progress ──────────────────────────────────────────────
+function refreshProgress() {
+  const vc  = P.videos.length;
+  const tot = C.videos.length + 3;
+  const done= vc + (P.pracDone?1:0) + (P.quizDone?1:0) + (P.assignDone?1:0);
+  const pct = Math.round(done/tot*100);
+
+  document.getElementById('badge-videos').textContent     = vc+'/'+C.videos.length;
+  document.getElementById('badge-practice').textContent   = P.pracDone   ? '✓' : '—';
+  document.getElementById('badge-quiz').textContent       = P.quizDone   ? (P.quizScore||0)+'/20' : '—';
+  document.getElementById('badge-assignment').textContent = P.assignDone ? '✓' : '—';
+
+  if (P.pracDone)   document.getElementById('nav-practice').classList.add('done');
+  if (P.quizDone)   document.getElementById('nav-quiz').classList.add('done');
+  if (P.assignDone) document.getElementById('nav-assignment').classList.add('done');
+
+  document.getElementById('overall-pct').textContent = pct+'%';
+  document.getElementById('overall-bar').style.width  = pct+'%';
+
+  const allDone = vc>=C.videos.length && P.pracDone && P.quizDone && P.assignDone;
+  if (allDone) document.getElementById('nav-assessment').classList.remove('locked');
+}
+
+function save() { localStorage.setItem(SKEY, JSON.stringify(P)); }
+
+// Tab key
+['practiceEditor','assignEditor'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key==='Tab') {
+      e.preventDefault();
+      const el=e.target, s=el.selectionStart;
+      el.value=el.value.substring(0,s)+'    '+el.value.substring(el.selectionEnd);
+      el.selectionStart=el.selectionEnd=s+4;
+    }
+  });
+});
+
+// Boot
+buildVideos();
+refreshProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Quiz - SLM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Quiz-specific styles (don't touch style.css) ── */
+
+    .quiz-wrapper {
+      max-width: 780px;
+      margin: 30px auto;
+      padding: 0 20px 60px;
+    }
+
+    /* Course selection modal */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-overlay.active { display: flex; }
+
+    #modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      width: 400px;
+      max-width: 92vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    #modal h2 { font-size: 1.4rem; color: #1a1a2e; margin-bottom: 6px; }
+    #modal > p { color: #666; font-size: .9rem; margin-bottom: 22px; }
+
+    .course-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .course-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all .2s;
+      background: #fafafa;
+    }
+    .course-card:hover    { border-color: #4f46e5; background: #eef2ff; }
+    .course-card.selected { border-color: #4f46e5; background: #eef2ff; }
+    .course-card .icon    { font-size: 1.6rem; margin-bottom: 6px; }
+    .course-card .name    { font-size: .88rem; font-weight: 600; color: #1a1a2e; }
+
+    .info-row { display: flex; gap: 10px; margin-bottom: 22px; }
+    .info-box {
+      flex: 1;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      font-size: .78rem;
+      color: #555;
+    }
+    .info-box b { display: block; font-size: 1.1rem; color: #1a1a2e; margin-bottom: 2px; }
+
+    .begin-btn {
+      width: 100%;
+      padding: 13px;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .begin-btn:hover    { background: #4338ca; }
+    .begin-btn:disabled { background: #a5b4fc; cursor: not-allowed; }
+
+    /* Quiz header bar */
+    #quiz-header {
+      display: none;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 22px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+    }
+    #quiz-header.active { display: flex; }
+    #quiz-header h2     { font-size: 1.1rem; color: #1a1a2e; margin: 0; }
+    #question-count     { color: #888; font-size: .82rem; margin-top: 2px; }
+
+    #timer {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #4f46e5;
+      background: #eef2ff;
+      padding: 6px 16px;
+      border-radius: 8px;
+      min-width: 72px;
+      text-align: center;
+    }
+    #timer.danger {
+      color: #dc2626;
+      background: #fef2f2;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+    /* Landing prompt (shown before quiz starts) */
+    #quiz-landing {
+      text-align: center;
+      padding: 60px 20px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    }
+    #quiz-landing h1 { font-size: 1.8rem; color: #1a1a2e; margin-bottom: 10px; }
+    #quiz-landing p  { color: #666; margin-bottom: 28px; }
+    .open-modal-btn {
+      padding: 13px 36px;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .open-modal-btn:hover { background: #4338ca; }
+
+    /* Loading spinner */
+    #loading { display: none; text-align: center; padding: 60px 20px; }
+    #loading.active { display: block; }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Question cards */
+    #quizContainer { display: none; }
+    #quizContainer.active { display: block; }
+
+    .question-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .question-card h3 {
+      font-size: .95rem;
+      color: #1a1a2e;
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 1.5px solid #e2e8f0;
+      transition: all .2s;
+      font-size: .9rem;
+      color: #333;
+    }
+    .option-label:hover   { border-color: #4f46e5; background: #f5f3ff; }
+    .option-label input   { accent-color: #4f46e5; }
+    .option-label.correct { background: #f0fdf4; border-color: #22c55e !important; color: #166534; }
+    .option-label.wrong   { background: #fef2f2; border-color: #ef4444 !important; color: #991b1b; }
+
+    /* Submit */
+    #submit-area { display: none; text-align: center; padding: 16px 0 30px; }
+    #submit-area.active { display: block; }
+    #submitQuiz {
+      padding: 14px 44px;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #submitQuiz:hover { background: #4338ca; }
+
+    /* Result */
+    #result { display: none; }
+    #result.active { display: block; }
+
+    .score-box {
+      text-align: center;
+      padding: 28px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 12px;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .score-box .score-num   { font-size: 3rem; font-weight: 700; }
+    .score-box .score-label { opacity: .88; font-size: 1rem; margin-top: 4px; }
+
+    .result-stats { display: flex; gap: 12px; margin-bottom: 20px; }
+    .stat {
+      flex: 1; text-align: center;
+      padding: 14px 10px;
+      border-radius: 10px;
+      font-size: .83rem;
+    }
+    .stat b       { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+    .stat.correct { background: #f0fdf4; color: #166534; }
+    .stat.wrong   { background: #fef2f2; color: #991b1b; }
+    .stat.skipped { background: #fffbeb; color: #92400e; }
+
+    .result-actions { display: flex; gap: 12px; }
+    .retry-btn, .home-btn {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .retry-btn { background: #4f46e5; color: #fff; }
+    .retry-btn:hover { background: #4338ca; }
+    .home-btn  { background: #f1f5f9; color: #1a1a2e; }
+    .home-btn:hover  { background: #e2e8f0; }
+  </style>
+</head>
+<body>
+
+<!-- ── Reuse your existing site header ── -->
+<header>
+  <div class="logo">SLM</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="courses.html">Courses</a>
+    <a href="quiz.html" class="active">Quiz</a>
+    <a href="#" id="loginBtn">Login</a>
+  </nav>
+</header>
+
+<!-- ── Course selection modal ── -->
+<div id="modal-overlay">
+  <div id="modal">
+    <h2>Choose Your Course</h2>
+    <p>20 questions &nbsp;·&nbsp; 30 minutes &nbsp;·&nbsp; AI generated</p>
+
+    <div class="course-grid">
+      <div class="course-card" onclick="selectCourse(this, 'Java')">
+        <div class="icon">☕</div><div class="name">Java</div>
+      </div>
+      <div class="course-card" onclick="selectCourse(this, 'DBMS')">
+        <div class="icon">🗄️</div><div class="name">DBMS</div>
+      </div>
+      <div class="course-card" onclick="selectCourse(this, 'DSA')">
+        <div class="icon">🌳</div><div class="name">DSA</div>
+      </div>
+      <div class="course-card" onclick="selectCourse(this, 'Web Development')">
+        <div class="icon">🌐</div><div class="name">Web Development</div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-box"><b>20</b>Questions</div>
+      <div class="info-box"><b>30</b>Minutes</div>
+      <div class="info-box"><b>MCQ</b>Format</div>
+    </div>
+
+    <button class="begin-btn" id="beginBtn" onclick="beginQuiz()" disabled>
+      Select a course to begin
+    </button>
+  </div>
+</div>
+
+<!-- ── Main quiz content ── -->
+<div class="quiz-wrapper">
+
+  <!-- Step 1: Landing prompt -->
+  <div id="quiz-landing">
+    <h1>🎯 AI Quiz Challenge</h1>
+    <p>Select a course and test your knowledge with 20 AI-generated questions</p>
+    <button class="open-modal-btn" onclick="openModal()">Start Quiz</button>
+  </div>
+
+  <!-- Step 2: Sticky timer header (shown during quiz) -->
+  <div id="quiz-header">
+    <div>
+      <h2 id="quiz-title">AI Quiz</h2>
+      <div id="question-count"></div>
+    </div>
+    <div id="timer">30:00</div>
+  </div>
+
+  <!-- Step 3: Loading spinner -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p style="color:#888;font-size:.95rem">Generating your quiz with Gemini AI...<br>
+    <span style="font-size:.82rem;color:#aaa">This may take a few seconds</span></p>
+  </div>
+
+  <!-- Step 4: Questions -->
+  <div id="quizContainer"></div>
+
+  <!-- Step 5: Submit button -->
+  <div id="submit-area">
+    <button id="submitQuiz" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+
+  <!-- Step 6: Results -->
+  <div id="result">
+    <div class="score-box">
+      <div class="score-num" id="scoreNum">0/20</div>
+      <div class="score-label" id="scoreLabel">Quiz Complete!</div>
+    </div>
+    <div class="result-stats">
+      <div class="stat correct"><b id="correctCount">0</b>Correct ✅</div>
+      <div class="stat wrong"><b id="wrongCount">0</b>Wrong ❌</div>
+      <div class="stat skipped"><b id="skipCount">0</b>Skipped ⏭</div>
+    </div>
+    <div class="result-actions">
+      <button class="retry-btn" onclick="location.reload()">🔄 Try Again</button>
+      <button class="home-btn"  onclick="location.href='index.html'">🏠 Back to Home</button>
+    </div>
+  </div>
+
+</div><!-- end .quiz-wrapper -->
+
+<footer>
+  <p>© Smart Learning System</p>
+</footer>
+
+<script src="js/auth.js"></script>
+<script src="js/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses - SLM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #0f1117;
+      --surface:#1a1d27;
+      --surface2:#22263a;
+      --border: #2e3248;
+      --text:   #e2e8f0;
+      --muted:  #718096;
+      --accent: #7c6af7;
+      --sans:   'Sora', sans-serif;
+      --body:   'Inter', sans-serif;
+    }
+    body { font-family: var(--body); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .logo { font-family: var(--sans); font-weight: 700; font-size: 1.15rem; color: var(--accent); }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      font-size: .88rem; margin-left: 22px; transition: color .2s;
+    }
+    nav a:hover, nav a.active { color: var(--text); }
+
+    .page-hero {
+      background: linear-gradient(135deg, #1a1d27 0%, #22263a 60%, #2d2060 100%);
+      padding: 56px 28px 52px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-hero h1 {
+      font-family: var(--sans); font-size: 2.2rem; font-weight: 700;
+      color: var(--text); margin-bottom: 12px;
+    }
+    .page-hero p { font-size: 1rem; color: var(--muted); max-width: 480px; margin: 0 auto; line-height: 1.65; }
+
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 22px;
+      max-width: 1120px;
+      margin: 44px auto;
+      padding: 0 28px;
+    }
+
+    .course-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform .25s, box-shadow .25s;
+      animation: fadeUp .4s ease both;
+    }
+    .course-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(124,106,247,.18);
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .course-card:nth-child(1){animation-delay:.05s}
+    .course-card:nth-child(2){animation-delay:.10s}
+    .course-card:nth-child(3){animation-delay:.15s}
+    .course-card:nth-child(4){animation-delay:.20s}
+
+    .card-top  { height: 5px; }
+    .card-body { padding: 24px; }
+    .card-icon { font-size: 2.4rem; margin-bottom: 14px; display: block; }
+    .card-title {
+      font-family: var(--sans); font-size: 1.1rem; font-weight: 700;
+      color: var(--text); margin-bottom: 9px;
+    }
+    .card-desc { font-size: .87rem; color: var(--muted); line-height: 1.65; margin-bottom: 18px; }
+
+    .card-meta { display: flex; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+    .meta-item { font-size: .77rem; color: var(--muted); }
+    .meta-item b { color: var(--text); }
+
+    .card-topics { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+    .topic-tag {
+      font-size: .72rem; padding: 3px 10px; border-radius: 20px;
+      border: 1px solid var(--border); color: var(--muted); background: var(--surface2);
+    }
+
+    .progress-wrap { margin-bottom: 18px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); margin-bottom: 6px; }
+    .progress-bar  { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 2px; transition: width .6s; }
+
+    .learn-btn {
+      width: 100%; padding: 12px; border: none; border-radius: 9px;
+      font-family: var(--sans); font-size: .9rem; font-weight: 600;
+      cursor: pointer; transition: all .2s; color: #fff;
+    }
+    .learn-btn:hover { filter: brightness(1.1); transform: scale(1.01); }
+
+    .java   .card-top, .java   .progress-fill, .java   .learn-btn { background: #f97316; }
+    .dbms   .card-top, .dbms   .progress-fill, .dbms   .learn-btn { background: #38bdf8; }
+    .dsa    .card-top, .dsa    .progress-fill, .dsa    .learn-btn { background: #10b981; }
+    .webdev .card-top, .webdev .progress-fill, .webdev .learn-btn { background: #8b5cf6; }
+
+    footer {
+      text-align: center; padding: 24px;
+      color: var(--muted); font-size: .82rem;
+      border-top: 1px solid var(--border); margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SLM</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="courses.html" class="active">Courses</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="coding.html">Practice</a>
+    <a href="#" id="loginBtn">Login</a>
+  </nav>
+</header>
+
+<div class="courses-grid">
+
+  <!-- Java -->
+  <div class="course-card java">
+    <div class="card-top"></div>
+    <div class="card-body">
+      <span class="card-icon">☕</span>
+      <div class="card-title">Java Programming</div>
+      <div class="card-desc">Learn Java from scratch — variables, OOP, collections, exception handling and more.</div>
+      <div class="card-meta">
+        <div class="meta-item">📹 <b>10</b> Videos</div>
+        <div class="meta-item">🧠 <b>20</b> Quiz Qs</div>
+        <div class="meta-item">⏱ <b>6 hrs</b></div>
+      </div>
+      <div class="card-topics">
+        <span class="topic-tag">Variables</span><span class="topic-tag">OOP</span>
+        <span class="topic-tag">Arrays</span><span class="topic-tag">Collections</span><span class="topic-tag">Exceptions</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Progress</span><span id="java-pct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="java-bar" style="width:0%"></div></div>
+      </div>
+      <button class="learn-btn" onclick="location.href='course.html?course=java'">Learn Java →</button>
+    </div>
+  </div>
+
+  <!-- DBMS -->
+  <div class="course-card dbms">
+    <div class="card-top"></div>
+    <div class="card-body">
+      <span class="card-icon">🗄️</span>
+      <div class="card-title">Database Management</div>
+      <div class="card-desc">Master relational databases, SQL queries, normalization, transactions and ER diagrams.</div>
+      <div class="card-meta">
+        <div class="meta-item">📹 <b>10</b> Videos</div>
+        <div class="meta-item">🧠 <b>20</b> Quiz Qs</div>
+        <div class="meta-item">⏱ <b>5 hrs</b></div>
+      </div>
+      <div class="card-topics">
+        <span class="topic-tag">SQL</span><span class="topic-tag">ER Diagrams</span>
+        <span class="topic-tag">Normalization</span><span class="topic-tag">Joins</span><span class="topic-tag">Transactions</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Progress</span><span id="dbms-pct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="dbms-bar" style="width:0%"></div></div>
+      </div>
+      <button class="learn-btn" onclick="location.href='course.html?course=dbms'">Learn DBMS →</button>
+    </div>
+  </div>
+
+  <!-- DSA -->
+  <div class="course-card dsa">
+    <div class="card-top"></div>
+    <div class="card-body">
+      <span class="card-icon">🌳</span>
+      <div class="card-title">Data Structures & Algorithms</div>
+      <div class="card-desc">Build strong DSA foundations — arrays, linked lists, trees, sorting and graph algorithms.</div>
+      <div class="card-meta">
+        <div class="meta-item">📹 <b>10</b> Videos</div>
+        <div class="meta-item">🧠 <b>20</b> Quiz Qs</div>
+        <div class="meta-item">⏱ <b>7 hrs</b></div>
+      </div>
+      <div class="card-topics">
+        <span class="topic-tag">Arrays</span><span class="topic-tag">Linked Lists</span>
+        <span class="topic-tag">Trees</span><span class="topic-tag">Sorting</span><span class="topic-tag">Graphs</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Progress</span><span id="dsa-pct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="dsa-bar" style="width:0%"></div></div>
+      </div>
+      <button class="learn-btn" onclick="location.href='course.html?course=dsa'">Learn DSA →</button>
+    </div>
+  </div>
+
+  <!-- Web Dev -->
+  <div class="course-card webdev">
+    <div class="card-top"></div>
+    <div class="card-body">
+      <span class="card-icon">🌐</span>
+      <div class="card-title">Web Development</div>
+      <div class="card-desc">From HTML basics to responsive layouts, JavaScript and modern CSS with real projects.</div>
+      <div class="card-meta">
+        <div class="meta-item">📹 <b>10</b> Videos</div>
+        <div class="meta-item">🧠 <b>20</b> Quiz Qs</div>
+        <div class="meta-item">⏱ <b>6 hrs</b></div>
+      </div>
+      <div class="card-topics">
+        <span class="topic-tag">HTML</span><span class="topic-tag">CSS</span>
+        <span class="topic-tag">JavaScript</span><span class="topic-tag">Flexbox</span><span class="topic-tag">DOM</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Progress</span><span id="webdev-pct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="webdev-bar" style="width:0%"></div></div>
+      </div>
+      <button class="learn-btn" onclick="location.href='course.html?course=webdev'">Learn Web Dev →</button>
+    </div>
+  </div>
+
+</div>
+
+<footer><p>© Smart Learning System</p></footer>
+
+<script src="js/auth.js"></script>
+<script>
+['java','dbms','dsa','webdev'].forEach(c => {
+  const p   = JSON.parse(localStorage.getItem('slm_progress_' + c) || '{}');
+  const done = (p.videos||[]).length + (p.pracDone?1:0) + (p.quizDone?1:0) + (p.assignDone?1:0);
+  const pct  = Math.round(done / 13 * 100);
+  document.getElementById(c+'-pct').textContent = pct + '%';
+  document.getElementById(c+'-bar').style.width  = pct + '%';
+});
+</script>
+</body>
+</html>

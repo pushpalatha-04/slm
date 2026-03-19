@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Practice - SLM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --surface2: #22263a;
+      --border:   #2e3248;
+      --accent:   #7c6af7;
+      --accent2:  #4fd1c5;
+      --danger:   #f56565;
+      --success:  #68d391;
+      --warning:  #f6ad55;
+      --text:     #e2e8f0;
+      --muted:    #718096;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 54px;
+      flex-shrink: 0;
+    }
+    .logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); letter-spacing: .04em; }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .88rem;
+      margin-left: 22px;
+      transition: color .2s;
+    }
+    nav a:hover, nav a.active { color: var(--text); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .toolbar-title { font-weight: 600; font-size: .95rem; color: var(--text); margin-right: 4px; }
+
+    .lang-tabs { display: flex; gap: 6px; }
+    .lang-tab {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: .83rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .lang-tab:hover  { border-color: var(--accent); color: var(--text); }
+    .lang-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .toolbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+      padding: 7px 18px;
+      border-radius: 7px;
+      border: none;
+      font-family: var(--sans);
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-run          { background: var(--success); color: #1a2e20; }
+    .btn-run:hover    { filter: brightness(1.1); }
+    .btn-run:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+    .btn-viz          { background: var(--surface2); color: var(--accent2); border: 1.5px solid var(--accent2); }
+    .btn-viz:hover    { background: var(--accent2); color: #0f2e2b; }
+    .btn-clear        { background: var(--surface2); color: var(--muted); border: 1.5px solid var(--border); }
+    .btn-clear:hover  { color: var(--danger); border-color: var(--danger); }
+
+    /* ── 3-pane layout ── */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 220px;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .pane-header {
+      padding: 8px 16px;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .pane-badge {
+      font-size: .7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--border);
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    /* Editor pane — top left */
+    .editor-pane {
+      grid-column: 1; grid-row: 1;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden; min-height: 0;
+    }
+    #codeEditor {
+      flex: 1;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.7;
+      border: none; outline: none;
+      padding: 16px 20px;
+      resize: none;
+      tab-size: 4;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    #codeEditor::placeholder { color: #3a3f5a; }
+    #codeEditor:focus { background: #0c0f1d; }
+
+    /* Output pane — bottom left */
+    .output-pane {
+      grid-column: 1; grid-row: 2;
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden; min-height: 0;
+    }
+    #outputBox {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 14px 18px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #0a0d17;
+    }
+    .out-success { color: var(--success); }
+    .out-error   { color: var(--danger); }
+    .out-info    { color: var(--accent2); }
+    .out-muted   { color: var(--muted); font-style: italic; }
+
+    /* Viz pane — full right column */
+    .viz-pane {
+      grid-column: 2; grid-row: 1 / 3;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      background: var(--surface);
+      min-height: 0;
+    }
+    .viz-empty {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100%; color: var(--muted);
+      text-align: center; gap: 12px; padding: 40px 30px;
+    }
+    .viz-empty .viz-icon { font-size: 2.8rem; opacity: .2; }
+    .viz-empty p { font-size: .88rem; line-height: 1.7; }
+
+    /* Playback controls */
+    .viz-playbar {
+      display: none; padding: 10px 14px;
+      background: var(--surface2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; gap: 8px; align-items: center; flex-wrap: wrap;
+    }
+    .viz-playbar.active { display: flex; }
+    .vp-btn {
+      padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); font-size: .78rem;
+      cursor: pointer; transition: all .15s; font-family: var(--body);
+    }
+    .vp-btn:hover { border-color: var(--accent); color: var(--text); }
+    .vp-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .vp-sep { width: 1px; height: 18px; background: var(--border); margin: 0 2px; }
+    .vp-counter { font-size: .75rem; color: var(--muted); margin-left: auto; }
+    .vp-speed { font-size: .72rem; color: var(--muted); }
+
+    /* Viz layout — 3 panels stacked */
+    .viz-panels { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0; min-height: 0; }
+
+    /* Current step highlight */
+    .viz-current-line {
+      padding: 8px 14px; background: rgba(124,106,247,.08);
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .vcl-label { font-size: .68rem; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .vcl-code  { font-family: var(--mono); font-size: .82rem; color: var(--accent2); white-space: pre-wrap; word-break: break-all; }
+    .vcl-what  { font-size: .78rem; color: var(--muted); margin-top: 3px; }
+
+    /* Variable watch panel */
+    .viz-section { border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .viz-sec-hdr {
+      padding: 7px 14px; font-size: .68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); background: var(--surface2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .viz-sec-body { padding: 10px 14px; }
+
+    .var-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .var-chip {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 7px; padding: 6px 12px; font-family: var(--mono);
+      font-size: .78rem; transition: border-color .3s, background .3s;
+      position: relative;
+    }
+    .var-chip.changed {
+      border-color: var(--warning);
+      background: rgba(246,173,85,.08);
+      animation: flash .5s ease;
+    }
+    @keyframes flash { 0%{background:rgba(246,173,85,.25)} 100%{background:rgba(246,173,85,.08)} }
+    .var-chip .vn { color: var(--warning); }
+    .var-chip .ve { color: var(--muted); margin: 0 4px; }
+    .var-chip .vv { color: var(--success); }
+    .var-chip .vold { font-size: .7rem; color: var(--muted); text-decoration: line-through; margin-right: 4px; }
+    .var-empty { font-size: .78rem; color: var(--muted); font-style: italic; }
+
+    /* Call stack */
+    .stack-list { display: flex; flex-direction: column; gap: 4px; }
+    .stack-frame {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 12px;
+      font-family: var(--mono); font-size: .78rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .stack-frame.active-frame { border-color: var(--accent); background: rgba(124,106,247,.06); }
+    .sf-name  { color: var(--accent2); flex: 1; }
+    .sf-line  { color: var(--muted); font-size: .7rem; }
+    .sf-arrow { color: var(--accent); font-size: .7rem; }
+
+    /* Output trace */
+    .output-trace { font-family: var(--mono); font-size: .8rem; display: flex; flex-direction: column; gap: 4px; }
+    .out-line {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 3px 0;
+    }
+    .out-arrow { color: var(--success); flex-shrink: 0; }
+    .out-text  { color: var(--text); white-space: pre-wrap; word-break: break-word; }
+
+    /* Step timeline at bottom */
+    .viz-timeline {
+      flex-shrink: 0; padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .tl-track {
+      height: 4px; background: var(--border); border-radius: 2px;
+      position: relative; cursor: pointer; margin-bottom: 6px;
+    }
+    .tl-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .2s; }
+    .tl-thumb {
+      position: absolute; top: 50%; transform: translate(-50%,-50%);
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent); border: 2px solid var(--bg);
+      transition: left .2s;
+    }
+    .tl-labels { display: flex; justify-content: space-between; font-size: .68rem; color: var(--muted); }
+
+    /* SQL table */
+    .sql-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .78rem; margin-top: 6px; }
+    .sql-table th { background: var(--border); color: var(--accent); padding: 5px 10px; text-align: left; font-weight: 600; }
+    .sql-table td { padding: 4px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+    .sql-table tr.new-row td { background: rgba(104,211,145,.08); }
+    .sql-table tr:last-child td { border-bottom: none; }
+
+    .viz-controls { display: none; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      text-align: center; padding: 10px;
+      font-size: .78rem; color: var(--muted); flex-shrink: 0;
+    }
+
+    @media (max-width: 700px) {
+      .main { grid-template-columns: 1fr; grid-template-rows: 340px 180px 340px; }
+      .editor-pane { grid-column: 1; grid-row: 1; }
+      .output-pane { grid-column: 1; grid-row: 2; }
+      .viz-pane    { grid-column: 1; grid-row: 3; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SLM</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="courses.html">Courses</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="coding.html" class="active">Practice</a>
+    <a href="#" id="loginBtn">Login</a>
+  </nav>
+</header>
+
+<div class="toolbar">
+  <span class="toolbar-title">💻 Code Practice</span>
+  <div class="lang-tabs">
+    <button class="lang-tab active" onclick="setLang('python', this)">🐍 Python</button>
+    <button class="lang-tab"        onclick="setLang('java',   this)">☕ Java</button>
+    <button class="lang-tab"        onclick="setLang('sql',    this)">🗄️ SQL</button>
+  </div>
+  <div class="toolbar-right">
+    <button class="btn btn-clear" onclick="clearEditor()">⟳ Clear</button>
+    <button class="btn btn-viz"   onclick="runVisualize()" id="vizBtn">◈ Visualize</button>
+    <button class="btn btn-run"   onclick="runCode()"      id="runBtn">▶ Run</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Editor: top-left -->
+  <div class="editor-pane">
+    <div class="pane-header">
+      Editor
+      <span class="pane-badge" id="langBadge">Python 3</span>
+    </div>
+    <textarea id="codeEditor" spellcheck="false" autocorrect="off" autocapitalize="off"
+      placeholder="# Write your Python code here..."></textarea>
+  </div>
+
+  <!-- Output: bottom-left -->
+  <div class="output-pane">
+    <div class="pane-header">
+      Output
+      <span id="runStatus" style="font-size:.72rem;letter-spacing:0;text-transform:none;font-weight:500"></span>
+    </div>
+    <div id="outputBox"><span class="out-muted">Run your code to see output here...</span></div>
+  </div>
+
+  <!-- Visualization: full right -->
+  <div class="viz-pane">
+    <div class="pane-header">
+      Visualization
+      <span class="pane-badge">Step-by-step trace</span>
+    </div>
+
+    <!-- Playback bar -->
+    <div class="viz-playbar" id="vizPlaybar">
+      <button class="vp-btn" onclick="vizStep(-1)">◀ Prev</button>
+      <button class="vp-btn" id="vizPlayBtn" onclick="togglePlay()">▶ Play</button>
+      <button class="vp-btn" onclick="vizStep(1)">Next ▶</button>
+      <div class="vp-sep"></div>
+      <button class="vp-btn" onclick="vizGoTo(0)">⏮</button>
+      <button class="vp-btn" onclick="vizGoTo(vizSteps.length-1)">⏭</button>
+      <div class="vp-sep"></div>
+      <button class="vp-btn" id="spd1" onclick="setSpeed(900)">0.5x</button>
+      <button class="vp-btn active" id="spd2" onclick="setSpeed(400)">1x</button>
+      <button class="vp-btn" id="spd3" onclick="setSpeed(120)">2x</button>
+      <span class="vp-counter" id="vizCounter">0 / 0</span>
+    </div>
+
+    <!-- Step panels -->
+    <div class="viz-panels" id="vizPanels">
+      <div class="viz-empty" id="vizEmpty">
+        <div class="viz-icon">◈</div>
+        <p>Click <b style="color:var(--accent2)">Visualize</b> to trace<br>your code step by step.<br><br>
+        Watch variables change,<br>loops iterate, and output<br>build up line by line.</p>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="viz-timeline" id="vizTimeline" style="display:none">
+      <div class="tl-track" id="tlTrack" onclick="tlClick(event)">
+        <div class="tl-fill"  id="tlFill"  style="width:0%"></div>
+        <div class="tl-thumb" id="tlThumb" style="left:0%"></div>
+      </div>
+      <div class="tl-labels">
+        <span>Step 1</span>
+        <span id="tlEnd">0</span>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<footer><p>© Smart Learning System</p></footer>
+
+<script src="js/auth.js"></script>
+<script>
+
+// ── Starter code templates ──────────────────────────────
+const STARTER = {
+  python: `# Python Practice
+n = 10
+total = 0
+for i in range(1, n + 1):
+    total += i
+print("Sum 1 to", n, "=", total)
+`,
+  java: `public class Main {
+    public static void main(String[] args) {
+        int n = 10;
+        int total = 0;
+        for (int i = 1; i <= n; i++) {
+            total += i;
+        }
+        System.out.println("Sum 1 to " + n + " = " + total);
+    }
+}
+`,
+  sql: `-- SQL Practice
+CREATE TABLE students (id INTEGER, name TEXT, score INTEGER);
+INSERT INTO students VALUES (1, 'Alice', 92);
+INSERT INTO students VALUES (2, 'Bob', 78);
+INSERT INTO students VALUES (3, 'Carol', 85);
+SELECT name, score FROM students WHERE score > 80 ORDER BY score DESC;
+`
+};
+
+const LANG_LABELS = { python: 'Python 3', java: 'Java', sql: 'SQLite' };
+let currentLang = 'python';
+
+// Init editor with starter code
+document.getElementById('codeEditor').value = STARTER.python;
+
+// ── Language switch ─────────────────────────────────────
+function setLang(lang, el) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('langBadge').textContent = LANG_LABELS[lang];
+  document.getElementById('codeEditor').value = STARTER[lang];
+  document.getElementById('codeEditor').placeholder =
+    lang === 'sql'  ? '-- Write your SQL here...'       :
+    lang === 'java' ? '// Write your Java code here...' :
+                      '# Write your Python code here...';
+  clearOutput();
+  resetViz();
+}
+
+function clearEditor() {
+  document.getElementById('codeEditor').value = STARTER[currentLang];
+  clearOutput();
+  resetViz();
+}
+
+function clearOutput() {
+  document.getElementById('outputBox').innerHTML =
+    '<span class="out-muted">Run your code to see output here...</span>';
+  document.getElementById('runStatus').textContent = '';
+}
+
+
+// ── Run code via Spring Boot + Gemini ───────────────────
+async function runCode() {
+  const code = document.getElementById('codeEditor').value.trim();
+  if (!code) return;
+
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Running...';
+
+  document.getElementById('outputBox').innerHTML =
+    '<span class="out-info">⏳ Sending to Gemini AI executor...</span>';
+  document.getElementById('runStatus').textContent = '';
+
+  try {
+    // POST to your Spring Boot backend — which calls Gemini
+    const res = await fetch('http://localhost:8080/api/code/run', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code:     code,
+        language: currentLang,
+        stdin:    ''
+      })
+    });
+
+    if (!res.ok) throw new Error('Server returned HTTP ' + res.status);
+
+    const result = await res.json();
+    showResult(result);
+
+  } catch (err) {
+    document.getElementById('outputBox').innerHTML =
+      `<span class="out-error">⚠️ Could not reach backend.\n\n` +
+      `Make sure Spring Boot is running at:\nhttp://localhost:8080\n\n` +
+      `Error: ${escHtml(err.message)}</span>`;
+    setStatus('✗ Error', 'var(--danger)');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶ Run';
+  }
+}
+
+function showResult(result) {
+  const stdout = (result.stdout || '').trim();
+  const stderr = (result.stderr || '').trim();
+
+  if (stderr && !stdout) {
+    // Error only
+    document.getElementById('outputBox').innerHTML =
+      `<span class="out-error">${escHtml(stderr)}</span>`;
+    setStatus('✗ Error', 'var(--danger)');
+
+  } else if (stdout) {
+    // Has output
+    let html = `<span class="out-success">${escHtml(stdout)}</span>`;
+    if (stderr) {
+      html += `\n\n<span class="out-error">⚠️ Warnings:\n${escHtml(stderr)}</span>`;
+    }
+    document.getElementById('outputBox').innerHTML = html;
+    setStatus('✓ Success', 'var(--success)');
+
+  } else {
+    document.getElementById('outputBox').innerHTML =
+      `<span class="out-muted">No output produced.</span>`;
+    setStatus('', '');
+  }
+}
+
+function setStatus(text, color) {
+  const el = document.getElementById('runStatus');
+  el.textContent  = text;
+  el.style.color  = color;
+}
+
+// ── Viz state ─────────────────────────────────────────────
+let vizSteps   = [];
+let vizCurrent = 0;
+let vizTimer   = null;
+let vizSpeed   = 400;
+let prevVars   = {};
+
+function resetViz() {
+  vizSteps = []; vizCurrent = 0; prevVars = {};
+  clearInterval(vizTimer); vizTimer = null;
+  document.getElementById('vizPlaybar').classList.remove('active');
+  document.getElementById('vizTimeline').style.display = 'none';
+  document.getElementById('vizPlayBtn').textContent = '▶ Play';
+  document.getElementById('vizPanels').innerHTML = `
+    <div class="viz-empty" id="vizEmpty">
+      <div class="viz-icon">◈</div>
+      <p>Click <b style="color:var(--accent2)">Visualize</b> to trace<br>your code step by step.</p>
+    </div>`;
+}
+
+// ── Run visualize — Gemini-powered deep trace ─────────────
+async function runVisualize() {
+  const code = document.getElementById('codeEditor').value.trim();
+  if (!code) { alert('Write some code first!'); return; }
+
+  const btn = document.getElementById('vizBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Tracing...';
+
+  // Show loading in viz panel
+  document.getElementById('vizPanels').innerHTML = `
+    <div class="viz-empty">
+      <div class="viz-icon" style="animation:spin .8s linear infinite;display:inline-block">◈</div>
+      <p style="margin-top:12px">Gemini is tracing your code...<br>
+      <span style="font-size:.75rem;color:var(--muted)">Analysing every line, variable and loop</span></p>
+    </div>`;
+
+  try {
+    const res = await fetch('http://localhost:8080/api/code/visualize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code, language: currentLang })
+    });
+
+    if (!res.ok) throw new Error('Backend returned ' + res.status);
+    const data = await res.json();
+    const raw  = (data.stdout || data.stderr || '').trim();
+
+    // Parse Gemini's JSON trace response
+    const steps = parseGeminiTrace(raw, code);
+
+    if (!steps || steps.length === 0) {
+      // Fallback to local tracer
+      let fallback = [];
+      if      (currentLang === 'python') fallback = tracePython(code);
+      else if (currentLang === 'java')   fallback = traceJava(code);
+      else if (currentLang === 'sql')    fallback = traceSQL(code);
+      if (fallback.length) {
+        launchViz(fallback);
+      } else {
+        document.getElementById('vizPanels').innerHTML = `
+          <div class="viz-empty"><div class="viz-icon">◈</div>
+          <p>Could not trace this code.<br>Try simpler code with variables and loops.</p></div>`;
+      }
+      return;
+    }
+
+    launchViz(steps);
+
+  } catch (err) {
+    // Fallback to local tracer on network error
+    let fallback = [];
+    if      (currentLang === 'python') fallback = tracePython(code);
+    else if (currentLang === 'java')   fallback = traceJava(code);
+    else if (currentLang === 'sql')    fallback = traceSQL(code);
+
+    if (fallback.length) {
+      launchViz(fallback);
+    } else {
+      document.getElementById('vizPanels').innerHTML = `
+        <div class="viz-empty"><div class="viz-icon">◈</div>
+        <p>⚠️ Could not reach backend.<br>Make sure Spring Boot is running.</p></div>`;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '◈ Visualize';
+  }
+}
+
+function launchViz(steps) {
+  vizSteps = steps; vizCurrent = 0; prevVars = {};
+  document.getElementById('vizPlaybar').classList.add('active');
+  document.getElementById('vizTimeline').style.display = 'block';
+  document.getElementById('tlEnd').textContent = steps.length;
+  renderStep(0);
+}
+
+// ── Parse Gemini trace response ────────────────────────────
+function parseGeminiTrace(raw, code) {
+  try {
+    // Strip markdown fences if present
+    let clean = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+
+    // Find JSON array boundaries
+    const start = clean.indexOf('[');
+    const end   = clean.lastIndexOf(']');
+    if (start === -1 || end === -1) return null;
+
+    clean = clean.substring(start, end + 1);
+    const parsed = JSON.parse(clean);
+
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+
+    // Normalize each step to match our renderStep() format
+    return parsed.map((s, i) => ({
+      line:   s.line   || '',
+      label:  s.label  || `Step ${i + 1}`,
+      what:   s.what   || '',
+      note:   s.note   || '',
+      vars:   s.vars   || {},
+      stack:  [{ name: 'main', line: s.lineNum || i + 1 }],
+      output: s.output !== undefined && s.output !== null ? s.output : undefined,
+      table:  s.table  || null,
+      type:   s.type   || 'generic',
+      lineNum: s.lineNum || i + 1
+    }));
+  } catch {
+    return null;
+  }
+}
+
+// ── Render single step ────────────────────────────────────
+function renderStep(idx) {
+  if (idx < 0 || idx >= vizSteps.length) return;
+  vizCurrent = idx;
+  const step = vizSteps[idx];
+  const pct  = ((idx + 1) / vizSteps.length * 100).toFixed(1);
+
+  document.getElementById('vizCounter').textContent = (idx+1) + ' / ' + vizSteps.length;
+  document.getElementById('tlFill').style.width  = pct + '%';
+  document.getElementById('tlThumb').style.left  = pct + '%';
+
+  const panels = document.getElementById('vizPanels');
+  panels.innerHTML = '';
+
+  // ── 1. Current line highlight ──
+  const curDiv = document.createElement('div');
+  curDiv.className = 'viz-current-line';
+  curDiv.innerHTML = `
+    <div class="vcl-label">${step.label}</div>
+    <div class="vcl-code">${escHtml(step.line)}</div>
+    <div class="vcl-what">${step.what || ''}</div>`;
+  panels.appendChild(curDiv);
+
+  // ── 2. Variable Watch ──
+  const varSec = document.createElement('div');
+  varSec.className = 'viz-section';
+  const vars  = step.vars || {};
+  const vKeys = Object.keys(vars);
+  varSec.innerHTML = `
+    <div class="viz-sec-hdr">
+      <span>📦 Variables</span>
+      <span style="font-size:.65rem">${vKeys.length} in scope</span>
+    </div>
+    <div class="viz-sec-body">
+      ${vKeys.length === 0
+        ? '<div class="var-empty">No variables yet</div>'
+        : `<div class="var-grid">${vKeys.map(k => {
+            const changed = prevVars[k] !== undefined && prevVars[k] !== vars[k];
+            const oldVal  = changed ? `<span class="vold">${fmtVal(prevVars[k])}</span>` : '';
+            return `<div class="var-chip${changed?' changed':''}">
+              <span class="vn">${k}</span><span class="ve">=</span>
+              ${oldVal}<span class="vv">${fmtVal(vars[k])}</span>
+            </div>`;
+          }).join('')}</div>`
+      }
+    </div>`;
+  panels.appendChild(varSec);
+  prevVars = {...vars};
+
+  // ── 3. Call Stack ──
+  if (step.stack && step.stack.length > 0) {
+    const stackSec = document.createElement('div');
+    stackSec.className = 'viz-section';
+    stackSec.innerHTML = `
+      <div class="viz-sec-hdr"><span>📚 Call Stack</span></div>
+      <div class="viz-sec-body">
+        <div class="stack-list">
+          ${step.stack.map((f, fi) => `
+            <div class="stack-frame${fi === step.stack.length-1 ? ' active-frame' : ''}">
+              <span class="sf-arrow">${fi === step.stack.length-1 ? '▶' : ' '}</span>
+              <span class="sf-name">${f.name}</span>
+              <span class="sf-line">line ${f.line}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    panels.appendChild(stackSec);
+  }
+
+  // ── 4. SQL Table state ──
+  if (step.table) {
+    const tblSec = document.createElement('div');
+    tblSec.className = 'viz-section';
+    const { cols, rows, newRowIdx } = step.table;
+    tblSec.innerHTML = `
+      <div class="viz-sec-hdr">
+        <span>🗄️ Table: ${step.table.name || ''}</span>
+        <span style="font-size:.65rem">${rows.length} row(s)</span>
+      </div>
+      <div class="viz-sec-body">
+        <table class="sql-table">
+          <thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+          <tbody>${rows.length > 0
+            ? rows.map((r,ri)=>`<tr class="${ri===newRowIdx?'new-row':''}">${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')
+            : `<tr><td colspan="${cols.length}" style="color:var(--muted);text-align:center;padding:8px">(empty)</td></tr>`
+          }</tbody>
+        </table>
+      </div>`;
+    panels.appendChild(tblSec);
+  }
+
+  // ── 5. Output so far ──
+  const outputLines = vizSteps.slice(0, idx+1).filter(s => s.output !== undefined);
+  if (outputLines.length > 0) {
+    const outSec = document.createElement('div');
+    outSec.className = 'viz-section';
+    outSec.innerHTML = `
+      <div class="viz-sec-hdr">
+        <span>🖥️ Output so far</span>
+        <span style="font-size:.65rem">${outputLines.length} line(s)</span>
+      </div>
+      <div class="viz-sec-body">
+        <div class="output-trace">
+          ${outputLines.map(s=>`<div class="out-line">
+            <span class="out-arrow">▶</span>
+            <span class="out-text">${escHtml(String(s.output))}</span>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    panels.appendChild(outSec);
+  }
+
+  // ── 6. Explanation note ──
+  if (step.note) {
+    const noteSec = document.createElement('div');
+    noteSec.style.cssText = 'padding:10px 14px;font-size:.8rem;color:var(--muted);line-height:1.6;border-top:1px solid var(--border)';
+    noteSec.innerHTML = '💡 ' + step.note;
+    panels.appendChild(noteSec);
+  }
+}
+
+// ── Playback controls ─────────────────────────────────────
+function vizStep(dir) {
+  const next = vizCurrent + dir;
+  if (next >= 0 && next < vizSteps.length) renderStep(next);
+}
+
+function vizGoTo(idx) { renderStep(Math.max(0, Math.min(idx, vizSteps.length-1))); }
+
+function togglePlay() {
+  const btn = document.getElementById('vizPlayBtn');
+  if (vizTimer) {
+    clearInterval(vizTimer); vizTimer = null;
+    btn.textContent = '▶ Play';
+  } else {
+    if (vizCurrent >= vizSteps.length - 1) renderStep(0);
+    btn.textContent = '⏸ Pause';
+    vizTimer = setInterval(() => {
+      if (vizCurrent >= vizSteps.length - 1) {
+        clearInterval(vizTimer); vizTimer = null;
+        btn.textContent = '▶ Play';
+      } else {
+        renderStep(vizCurrent + 1);
+      }
+    }, vizSpeed);
+  }
+}
+
+function setSpeed(ms) {
+  vizSpeed = ms;
+  ['spd1','spd2','spd3'].forEach(id => document.getElementById(id).classList.remove('active'));
+  const map = {900:'spd1', 400:'spd2', 120:'spd3'};
+  if (map[ms]) document.getElementById(map[ms]).classList.add('active');
+  if (vizTimer) { clearInterval(vizTimer); vizTimer = null; togglePlay(); }
+}
+
+function tlClick(e) {
+  const rect = document.getElementById('tlTrack').getBoundingClientRect();
+  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  vizGoTo(Math.round(pct * (vizSteps.length - 1)));
+}
+
+// ── Python tracer ─────────────────────────────────────────
+function tracePython(code) {
+  const steps = [], vars = {}, stack = [{ name: 'main', line: 1 }];
+  const lines = code.split('\n');
+  const outputBuf = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw  = lines[i];
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+
+    // augmented
+    const augM = line.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|\/\/=|%=|\*\*=)\s*(.+)$/);
+    if (augM) {
+      const [, name, op, expr] = augM;
+      const rhs = evalSafe(expr, vars), prev = vars[name] ?? 0;
+      const before = prev;
+      if      (op==='+=')  vars[name] = prev + rhs;
+      else if (op==='-=')  vars[name] = prev - rhs;
+      else if (op==='*=')  vars[name] = prev * rhs;
+      else if (op==='/=')  vars[name] = prev / rhs;
+      else if (op==='//=') vars[name] = Math.floor(prev / rhs);
+      else if (op==='%=')  vars[name] = prev % rhs;
+      else if (op==='**=') vars[name] = Math.pow(prev, rhs);
+      stack[stack.length-1].line = i+1;
+      steps.push({ line: raw, label: `Line ${i+1} — Update`, what: `${name} was ${fmtVal(before)}, now ${fmtVal(vars[name])}`,
+        vars: {...vars}, stack: [...stack], note: `<b>${name}</b> ${op} ${fmtVal(rhs)} → ${fmtVal(vars[name])}` });
+      continue;
+    }
+
+    // assignment
+    const assM = line.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+    if (assM && !line.startsWith('for') && !line.startsWith('if') && !line.startsWith('while')) {
+      const [, name, expr] = assM;
+      const val = evalSafe(expr, vars);
+      vars[name] = val;
+      stack[stack.length-1].line = i+1;
+      steps.push({ line: raw, label: `Line ${i+1} — Assign`, what: `${name} ← ${fmtVal(val)}`,
+        vars: {...vars}, stack: [...stack], note: `Variable <b>${name}</b> is set to <b>${fmtVal(val)}</b>` });
+      continue;
+    }
+
+    // for loop
+    const forM = line.match(/^for\s+([a-zA-Z_]\w*)\s+in\s+range\((.+)\)/);
+    if (forM) {
+      const [, iterVar, rangeArgs] = forM;
+      const args  = rangeArgs.split(',').map(a => Number(evalSafe(a.trim(), vars)));
+      const start = args.length >= 2 ? args[0] : 0;
+      const end   = args.length >= 2 ? args[1] : args[0];
+      const step  = args.length >= 3 ? args[2] : 1;
+      const count = Math.ceil((end - start) / step);
+      stack[stack.length-1].line = i+1;
+      steps.push({ line: raw, label: `Line ${i+1} — Loop`, what: `Starting loop: ${count} iterations`,
+        vars: {...vars}, stack: [...stack], note: `Loop runs <b>${count}</b> times: ${iterVar} goes ${start} → ${end-1}` });
+
+      const body = [];
+      for (let j = i+1; j < lines.length; j++) {
+        if (lines[j].match(/^\s+/) || lines[j].trim() === '') body.push({ raw: lines[j], lineNum: j+1 });
+        else break;
+      }
+
+      let iter = 0;
+      for (let v = start; v < end; v += step) {
+        if (iter >= 12) {
+          steps.push({ line: '    ...', label: `Truncated (${count - iter} more)`, what: 'Showing first 12 iterations only',
+            vars: {...vars}, stack: [...stack] });
+          break;
+        }
+        vars[iterVar] = v;
+
+        // execute body
+        body.forEach(({ raw: bl, lineNum: ln }) => {
+          const bt = bl.trim();
+          if (!bt || bt.startsWith('#')) return;
+
+          const bAug = bt.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|\/\/=|%=)\s*(.+)$/);
+          if (bAug) {
+            const [, n, op, ex] = bAug;
+            const rhs = evalSafe(ex, vars), bprev = vars[n] ?? 0;
+            if      (op==='+=')  vars[n] = bprev + rhs;
+            else if (op==='-=')  vars[n] = bprev - rhs;
+            else if (op==='*=')  vars[n] = bprev * rhs;
+            else if (op==='/=')  vars[n] = bprev / rhs;
+            else if (op==='//=') vars[n] = Math.floor(bprev / rhs);
+            else if (op==='%=')  vars[n] = bprev % rhs;
+            stack[stack.length-1].line = ln;
+            steps.push({ line: bl, label: `Line ${ln} — iter ${iter+1}`, what: `${n}: ${fmtVal(bprev)} → ${fmtVal(vars[n])}`,
+              vars: {...vars}, stack: [...stack], note: `<b>${iterVar}</b>=${v}: ${n} updated from ${fmtVal(bprev)} to ${fmtVal(vars[n])}` });
+          }
+
+          const bAss = bt.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+          if (bAss && !bt.startsWith('for') && !bt.startsWith('if')) {
+            const [, n, ex] = bAss;
+            const val = evalSafe(ex, vars);
+            vars[n] = val;
+            steps.push({ line: bl, label: `Line ${ln} — iter ${iter+1}`, what: `${n} ← ${fmtVal(val)}`,
+              vars: {...vars}, stack: [...stack] });
+          }
+
+          // print inside loop
+          const pm = bt.match(/^print\((.+)\)$/);
+          if (pm) {
+            const val = evalPrint(pm[1], vars);
+            outputBuf.push(val);
+            steps.push({ line: bl, label: `Line ${ln} — print`, what: `Output: ${val}`,
+              vars: {...vars}, stack: [...stack], output: val,
+              note: `prints <b>"${escHtml(String(val))}"</b> to console` });
+          }
+        });
+
+        // loop iteration marker
+        steps.push({ line: `↩ ${iterVar} = ${v}  (iteration ${iter+1}/${count})`,
+          label: `Iteration ${iter+1} done`, what: `Loop body finished, ${iterVar} = ${v}`,
+          vars: {...vars}, stack: [...stack],
+          note: `After iteration ${iter+1}: ${Object.entries(vars).filter(([k])=>k!==iterVar).map(([k,v])=>`${k}=${fmtVal(v)}`).join(', ') || 'no other vars'}` });
+        iter++;
+      }
+
+      steps.push({ line: `✓ Loop finished`, label: `Loop end`, what: `All ${count} iterations complete`,
+        vars: {...vars}, stack: [...stack], note: `Loop completed. Final values: ${Object.entries(vars).map(([k,v])=>`${k}=${fmtVal(v)}`).join(', ')}` });
+      continue;
+    }
+
+    // print
+    const pm = line.match(/^print\((.+)\)$/);
+    if (pm) {
+      const val = evalPrint(pm[1], vars);
+      outputBuf.push(val);
+      stack[stack.length-1].line = i+1;
+      steps.push({ line: raw, label: `Line ${i+1} — print`, what: `Output: ${val}`,
+        vars: {...vars}, stack: [...stack], output: val,
+        note: `<b>print()</b> outputs <b>"${escHtml(String(val))}"</b> → console` });
+      continue;
+    }
+
+    // if/elif/else
+    if (line.startsWith('if ') || line.startsWith('elif ') || line === 'else:') {
+      let result = '?';
+      const condM = line.match(/^(?:if|elif)\s+(.+?):?$/);
+      if (condM) {
+        try { result = evalSafe(condM[1].replace(/:$/, ''), vars) ? 'TRUE ✓' : 'FALSE ✗'; } catch {}
+      }
+      stack[stack.length-1].line = i+1;
+      steps.push({ line: raw, label: `Line ${i+1} — Condition`, what: `Evaluates to: ${result}`,
+        vars: {...vars}, stack: [...stack], note: `Condition check: <b>${escHtml(line.replace(/:$/,''))}</b> → ${result}` });
+      continue;
+    }
+
+    // while
+    if (line.startsWith('while ')) {
+      steps.push({ line: raw, label: `Line ${i+1} — While`, what: `Checking loop condition`,
+        vars: {...vars}, stack: [...stack] });
+      continue;
+    }
+
+    // function def
+    const fnM = line.match(/^def\s+(\w+)\s*\(([^)]*)\)\s*:/);
+    if (fnM) {
+      steps.push({ line: raw, label: `Line ${i+1} — Define function`, what: `Function ${fnM[1]}() defined`,
+        vars: {...vars}, stack: [...stack], note: `Defines function <b>${fnM[1]}</b> with params: ${fnM[2] || 'none'}` });
+      continue;
+    }
+
+    // return
+    if (line.startsWith('return ')) {
+      const retM = line.match(/^return\s+(.+)$/);
+      const val  = retM ? evalSafe(retM[1], vars) : undefined;
+      steps.push({ line: raw, label: `Line ${i+1} — Return`, what: `Returns ${fmtVal(val)}`,
+        vars: {...vars}, stack: [...stack], note: `Function returns <b>${fmtVal(val)}</b>` });
+      continue;
+    }
+
+    steps.push({ line: raw, label: `Line ${i+1}`, what: escHtml(line), vars: {...vars}, stack: [...stack] });
+  }
+
+  // final output summary
+  if (outputBuf.length > 0) {
+    steps.push({ line: '--- Program finished ---', label: 'Final Output', what: 'All output produced',
+      vars: {...vars}, stack: [{name:'main',line:'end'}],
+      output: outputBuf.join('\n'),
+      note: `Complete output:\n<pre style="font-family:var(--mono);font-size:.78rem;margin-top:6px;color:var(--success)">${escHtml(outputBuf.join('\n'))}</pre>` });
+  }
+
+  return steps;
+}
+
+function evalPrint(expr, vars) {
+  expr = expr.trim();
+  // handle print("text", var, ...) with commas
+  const parts = expr.split(',').map(p => {
+    p = p.trim();
+    const strM = p.match(/^["'](.+)["']$/);
+    if (strM) return strM[1];
+    return String(evalSafe(p, vars) ?? p);
+  });
+  return parts.join(' ');
+}
+
+// ── Java tracer ───────────────────────────────────────────
+function traceJava(code) {
+  const steps = [], vars = {}, stack = [{ name: 'main', line: 1 }];
+  const lines = code.split('\n');
+  const outputBuf = [];
+
+  lines.forEach((raw, i) => {
+    const line = raw.trim();
+    if (!line || line.startsWith('//') || line === '{' || line === '}') return;
+    if (line.startsWith('public class') || line.includes('public static void main')) return;
+    if (line === 'import java.util.Stack;' || line === 'import java.util.*;') return;
+
+    stack[0].line = i+1;
+
+    // Declaration with assignment
+    const declM = line.match(/^(?:int|double|float|long|String|boolean|char|var)\s+([a-zA-Z_]\w*)\s*=\s*(.+?);$/);
+    if (declM) {
+      const [, name, expr] = declM;
+      const val = evalSafe(expr.replace(/['"]/g, ''), vars);
+      vars[name] = val;
+      steps.push({ line: raw, label: `Line ${i+1} — Declare`, what: `${name} = ${fmtVal(val)}`,
+        vars: {...vars}, stack: [...stack], note: `Declares <b>${name}</b> = ${fmtVal(val)}` });
+      return;
+    }
+
+    // Declaration without value
+    const declNoVal = line.match(/^(?:int|double|float|long|String|boolean|char)\s+([a-zA-Z_]\w*)\s*;$/);
+    if (declNoVal) {
+      vars[declNoVal[1]] = 0;
+      steps.push({ line: raw, label: `Line ${i+1} — Declare`, what: `${declNoVal[1]} declared (default 0)`,
+        vars: {...vars}, stack: [...stack] });
+      return;
+    }
+
+    // Augmented assignment
+    const augM = line.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|%=)\s*(.+?);$/);
+    if (augM) {
+      const [, name, op, expr] = augM;
+      const rhs = evalSafe(expr, vars), prev = vars[name] ?? 0;
+      if      (op==='+=') vars[name] = prev + rhs;
+      else if (op==='-=') vars[name] = prev - rhs;
+      else if (op==='*=') vars[name] = prev * rhs;
+      else if (op==='/=') vars[name] = prev / rhs;
+      else if (op==='%=') vars[name] = prev % rhs;
+      steps.push({ line: raw, label: `Line ${i+1} — Update`, what: `${name}: ${fmtVal(prev)} → ${fmtVal(vars[name])}`,
+        vars: {...vars}, stack: [...stack], note: `<b>${name}</b> ${op} ${fmtVal(rhs)} → now <b>${fmtVal(vars[name])}</b>` });
+      return;
+    }
+
+    // i++ / i--
+    const incM = line.match(/^([a-zA-Z_]\w*)(\+\+|--);?$/);
+    if (incM) {
+      const [, name, op] = incM;
+      const prev = vars[name] ?? 0;
+      vars[name] = op === '++' ? prev + 1 : prev - 1;
+      steps.push({ line: raw, label: `Line ${i+1} — Increment`, what: `${name}: ${prev} → ${vars[name]}`,
+        vars: {...vars}, stack: [...stack] });
+      return;
+    }
+
+    // for loop
+    const forM = line.match(/^for\s*\(\s*(?:int\s+)?(\w+)\s*=\s*(\d+)\s*;\s*\1\s*([<>]=?|!=)\s*([^;]+)\s*;\s*\1(\+\+|--|\+=\s*\d+|-=\s*\d+)/);
+    if (forM) {
+      const [, iterVar, startStr, op, endStr] = forM;
+      const start = Number(startStr), end = Number(evalSafe(endStr, vars));
+      const count = op === '<' ? end - start : op === '<=' ? end - start + 1 : Math.abs(end - start);
+      steps.push({ line: raw, label: `Line ${i+1} — For loop`, what: `Loop: ${iterVar} = ${start} to ${end}, ${count} iters`,
+        vars: {...vars}, stack: [...stack], note: `<b>for</b> loop: ${iterVar} starts at ${start}, runs ${count} time(s)` });
+
+      // Gather body
+      const depth = (line.match(/\{/) ? 1 : 0);
+      const body = [];
+      let d = depth;
+      for (let j = i+1; j < lines.length; j++) {
+        const bl = lines[j].trim();
+        if (!bl) continue;
+        d += (bl.match(/\{/g)||[]).length - (bl.match(/\}/g)||[]).length;
+        if (d <= 0 && bl === '}') break;
+        if (bl !== '{') body.push({ raw: lines[j], lineNum: j+1 });
+      }
+
+      let bound = op==='<' ? end : op==='<='? end+1 : end-1;
+      let v = start, iter = 0;
+      while ((op==='<'?v<end:op==='<='?v<=end:op==='>'?v>end:v>=Number(endStr)) && iter < 12) {
+        vars[iterVar] = v;
+        body.forEach(({ raw: bl, lineNum: ln }) => {
+          const bt = bl.trim();
+          if (!bt || bt === '{' || bt === '}' || bt.startsWith('//')) return;
+
+          const bAug = bt.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|%=)\s*(.+?);$/);
+          if (bAug) {
+            const [, n, bop, ex] = bAug;
+            const rhs = evalSafe(ex, vars), bp = vars[n] ?? 0;
+            if      (bop==='+=') vars[n] = bp + rhs;
+            else if (bop==='-=') vars[n] = bp - rhs;
+            else if (bop==='*=') vars[n] = bp * rhs;
+            steps.push({ line: bl, label: `Line ${ln} iter ${iter+1}`, what: `${n}: ${fmtVal(bp)} → ${fmtVal(vars[n])}`,
+              vars: {...vars}, stack: [...stack], note: `<b>${iterVar}</b>=${v}: ${n} → ${fmtVal(vars[n])}` });
+          }
+
+          const bInc = bt.match(/^([a-zA-Z_]\w*)(\+\+|--);?$/);
+          if (bInc) {
+            const bp = vars[bInc[1]] ?? 0;
+            vars[bInc[1]] = bInc[2]==='++' ? bp+1 : bp-1;
+            steps.push({ line: bl, label: `Line ${ln} iter ${iter+1}`, what: `${bInc[1]}: ${bp} → ${vars[bInc[1]]}`,
+              vars: {...vars}, stack: [...stack] });
+          }
+
+          if (bt.includes('System.out.print')) {
+            const sM = bt.match(/System\.out\.println?\s*\((.+)\)/);
+            if (sM) {
+              const val = evalPrintJava(sM[1], vars);
+              outputBuf.push(val);
+              steps.push({ line: bl, label: `Line ${ln} — print`, what: `Output: ${val}`,
+                vars: {...vars}, stack: [...stack], output: val, note: `Prints: <b>"${escHtml(String(val))}"</b>` });
+            }
+          }
+        });
+
+        steps.push({ line: `↩ ${iterVar} = ${v}  (iter ${iter+1}/${count})`,
+          label: `Iteration ${iter+1} done`, what: `Body executed, ${iterVar} = ${v}`,
+          vars: {...vars}, stack: [...stack],
+          note: `After iter ${iter+1}: ${Object.entries(vars).map(([k,v])=>`${k}=${fmtVal(v)}`).join(', ')}` });
+
+        v = forM[5].includes('++') ? v+1 : forM[5].includes('--') ? v-1 : v + (Number(forM[5].match(/\d+/)?.[0]||1));
+        iter++;
+      }
+      if (iter >= 12) steps.push({ line: '...', label: 'Loop truncated', what: 'Showing first 12 iterations', vars: {...vars}, stack: [...stack] });
+      steps.push({ line: `✓ for loop finished`, label: 'Loop end', what: `All ${count} iterations done`,
+        vars: {...vars}, stack: [...stack], note: `Loop complete. Final: ${Object.entries(vars).map(([k,v])=>`${k}=${fmtVal(v)}`).join(', ')}` });
+      return;
+    }
+
+    // System.out.println
+    if (line.includes('System.out.print')) {
+      const sM = line.match(/System\.out\.println?\s*\((.+)\)\s*;?$/);
+      if (sM) {
+        const val = evalPrintJava(sM[1], vars);
+        outputBuf.push(val);
+        steps.push({ line: raw, label: `Line ${i+1} — Print`, what: `Output: ${val}`,
+          vars: {...vars}, stack: [...stack], output: val, note: `Prints <b>"${escHtml(String(val))}"</b> to console` });
+        return;
+      }
+    }
+
+    // if statement
+    if (line.startsWith('if ') || line.startsWith('if(')) {
+      const cM = line.match(/^if\s*\((.+?)\)/);
+      let result = '?';
+      if (cM) { try { result = evalSafe(cM[1], vars) ? 'TRUE ✓' : 'FALSE ✗'; } catch {} }
+      steps.push({ line: raw, label: `Line ${i+1} — Condition`, what: `if(…) → ${result}`,
+        vars: {...vars}, stack: [...stack], note: `Condition evaluates to <b>${result}</b>` });
+      return;
+    }
+  });
+
+  if (outputBuf.length > 0) {
+    steps.push({ line: '--- Program finished ---', label: 'Final Output', what: 'Execution complete',
+      vars: {...vars}, stack: [{name:'main',line:'end'}],
+      output: outputBuf.join('\n'),
+      note: `Complete output:<br><pre style="font-family:var(--mono);font-size:.78rem;margin-top:6px;color:var(--success)">${escHtml(outputBuf.join('\n'))}</pre>` });
+  }
+  return steps;
+}
+
+function evalPrintJava(expr, vars) {
+  expr = expr.trim();
+  // handle "text" + var + ... string concatenation
+  const parts = expr.split(/\+(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(p => {
+    p = p.trim();
+    const strM = p.match(/^["'](.*)["']$/);
+    if (strM) return strM[1];
+    const val = evalSafe(p, vars);
+    return val !== undefined && val !== p ? String(val) : p;
+  });
+  return parts.join('');
+}
+
+// ── SQL tracer ────────────────────────────────────────────
+function traceSQL(code) {
+  const steps = [], tables = {};
+  const stmts = code.split(';').map(s => s.trim()).filter(Boolean);
+
+  stmts.forEach((stmt, i) => {
+    const up = stmt.toUpperCase().trim();
+
+    if (up.startsWith('CREATE TABLE')) {
+      const m = stmt.match(/CREATE\s+TABLE\s+(\w+)\s*\((.+)\)/si);
+      if (m) {
+        const tname = m[1], cols = m[2].split(',').map(c => c.trim().split(/\s+/)[0]);
+        tables[tname] = { cols, rows: [] };
+        steps.push({ line: stmt+';', label: `Stmt ${i+1} — CREATE TABLE`,
+          what: `Table "${tname}" created with ${cols.length} columns`, vars: {},
+          note: `Created table <b>${tname}</b> with columns: ${cols.join(', ')}` });
+      }
+
+    } else if (up.startsWith('INSERT INTO')) {
+      const m = stmt.match(/INSERT\s+INTO\s+(\w+)\s+VALUES\s*\((.+)\)/si);
+      if (m) {
+        const tname = m[1], vals = m[2].split(',').map(v => v.trim().replace(/'/g, ''));
+        if (tables[tname]) {
+          tables[tname].rows.push(vals);
+          const newIdx = tables[tname].rows.length - 1;
+          steps.push({ line: stmt+';', label: `Stmt ${i+1} — INSERT`,
+            what: `Row added: [${vals.join(', ')}]`, vars: {},
+            table: { name: tname, cols: tables[tname].cols, rows: [...tables[tname].rows], newRowIdx: newIdx },
+            note: `Inserted row ${newIdx+1} into <b>${tname}</b>: [${vals.join(', ')}]` });
+        }
+      }
+
+    } else if (up.startsWith('SELECT')) {
+      const fromM  = stmt.match(/FROM\s+(\w+)/i);
+      const whereM = stmt.match(/WHERE\s+(.+?)(?:\s+ORDER|\s+GROUP|\s+LIMIT|$)/i);
+      const orderM = stmt.match(/ORDER\s+BY\s+(\w+)\s*(ASC|DESC)?/i);
+      const tname  = fromM ? fromM[1] : null;
+      let rows = tname && tables[tname] ? [...tables[tname].rows] : [];
+      let note = `SELECT from <b>${tname}</b>`;
+
+      // Step 1: show all rows before filter
+      if (tname && tables[tname]) {
+        steps.push({ line: stmt+';', label: `Stmt ${i+1} — SELECT (scan)`,
+          what: `Scanning all ${rows.length} rows in ${tname}`, vars: {},
+          table: { name: tname, cols: tables[tname].cols, rows: [...rows] },
+          note: `Full table scan: ${rows.length} rows found in <b>${tname}</b>` });
+      }
+
+      // Step 2: apply WHERE filter
+      if (whereM && tname && tables[tname]) {
+        const before = rows.length;
+        const condM = whereM[1].trim().match(/(\w+)\s*([><=!]+)\s*(.+)/);
+        if (condM) {
+          const [, col, op, rval] = condM;
+          const ci = tables[tname].cols.indexOf(col);
+          if (ci >= 0) {
+            rows = rows.filter(row => {
+              const lv = isNaN(row[ci]) ? row[ci] : Number(row[ci]);
+              const rv = isNaN(rval) ? rval.replace(/'/g,'') : Number(rval);
+              if (op==='>') return lv>rv; if (op==='<') return lv<rv;
+              if (op==='>=') return lv>=rv; if (op==='<=') return lv<=rv;
+              if (op==='='||op==='==') return lv==rv; return true;
+            });
+          }
+        }
+        steps.push({ line: `WHERE ${whereM[1]}`, label: `Stmt ${i+1} — WHERE filter`,
+          what: `${before} rows → ${rows.length} rows after filter`, vars: {},
+          table: { name: tname, cols: tables[tname].cols, rows: [...rows] },
+          note: `WHERE <b>${escHtml(whereM[1])}</b> — kept ${rows.length} of ${before} rows` });
+      }
+
+      // Step 3: apply ORDER BY
+      if (orderM && tname && tables[tname]) {
+        const ci  = tables[tname].cols.indexOf(orderM[1]);
+        const dir = (orderM[2] || 'ASC').toUpperCase();
+        if (ci >= 0) rows.sort((a, b) => {
+          const av = isNaN(a[ci]) ? a[ci] : Number(a[ci]);
+          const bv = isNaN(b[ci]) ? b[ci] : Number(b[ci]);
+          return dir==='ASC' ? (av>bv?1:-1) : (av<bv?1:-1);
+        });
+        steps.push({ line: `ORDER BY ${orderM[1]} ${dir}`, label: `Stmt ${i+1} — ORDER BY`,
+          what: `Sorted by ${orderM[1]} ${dir}`, vars: {},
+          table: { name: tname, cols: tables[tname].cols, rows: [...rows] },
+          note: `Sorted by <b>${orderM[1]} ${dir}</b> — final result: ${rows.length} row(s)` });
+      }
+
+      // Step 4: final result
+      steps.push({ line: stmt+';', label: `Stmt ${i+1} — Result`,
+        what: `Query returned ${rows.length} row(s)`, vars: {},
+        table: { name: tname || 'result', cols: tname && tables[tname] ? tables[tname].cols : [], rows: [...rows] },
+        note: `Final result: <b>${rows.length}</b> row(s) returned`, output: `${rows.length} row(s) returned` });
+
+    } else if (up.startsWith('UPDATE')) {
+      steps.push({ line: stmt+';', label: `Stmt ${i+1} — UPDATE`, what: 'Updating rows', vars: {}, note: escHtml(stmt.substring(0,80)) });
+    } else if (up.startsWith('DELETE')) {
+      steps.push({ line: stmt+';', label: `Stmt ${i+1} — DELETE`, what: 'Deleting rows', vars: {}, note: escHtml(stmt.substring(0,80)) });
+    } else {
+      steps.push({ line: stmt+';', label: `Stmt ${i+1}`, what: escHtml(stmt.substring(0,60)), vars: {} });
+    }
+  });
+  return steps;
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function evalSafe(expr, vars) {
+  if (!expr) return undefined;
+  expr = String(expr).trim().replace(/;$/, '');
+  // replace Java/Python power
+  expr = expr.replace(/Math\.pow\(([^,]+),([^)]+)\)/, '($1)**($2)');
+  expr = expr.replace(/Math\.sqrt\(([^)]+)\)/, 'Math.sqrt($1)');
+  Object.entries(vars).forEach(([k, v]) => {
+    expr = expr.replace(new RegExp('\\b' + k + '\\b', 'g'), typeof v === 'string' ? `"${v}"` : v);
+  });
+  try { return Function('"use strict"; return (' + expr + ')')(); }
+  catch { return expr; }
+}
+
+function fmtVal(v) {
+  if (v === undefined || v === null) return 'null';
+  if (typeof v === 'string')  return '"' + v + '"';
+  if (typeof v === 'boolean') return v ? 'true' : 'false';
+  if (typeof v === 'number')  return Number.isInteger(v) ? v : parseFloat(v.toFixed(4));
+  return String(v);
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Tab key
+document.getElementById('codeEditor').addEventListener('keydown', e => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const el = e.target, s = el.selectionStart;
+    el.value = el.value.substring(0, s) + '    ' + el.value.substring(el.selectionEnd);
+    el.selectionStart = el.selectionEnd = s + 4;
+  }
+});
+
+</script>
+</body>
+</html>
