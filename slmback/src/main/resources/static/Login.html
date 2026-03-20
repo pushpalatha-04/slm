@@ -108,9 +108,9 @@
   function redirectAfterAuth(role) {
     const r = (role || '').toUpperCase();
     if (r === 'TUTOR') {
-      window.location.href = 'https://slm-b8oo.onrender.comtutor-dashboard.html';
+      window.location.href = 'tutor-dashboard.html';
     } else {
-      window.location.href = 'https://slm-b8oo.onrender.comstudent-dashboard.html';
+      window.location.href = 'student-dashboard.html';
     }
   }
   async function doLogin() {
