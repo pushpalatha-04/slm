@@ -49,7 +49,6 @@
     <button class="tab active" onclick="switchTab('login')">Login</button>
     <button class="tab"        onclick="switchTab('signup')">Sign Up</button>
   </div>
-
   <!-- LOGIN -->
   <div id="loginForm">
     <div class="fg"><label class="fl">Username or Email</label><input class="fi" id="lu" type="text" placeholder="Enter username or email" autocomplete="username"></div>
@@ -57,7 +56,6 @@
     <button class="sbtn" id="loginBtn" onclick="doLogin()">Login →</button>
     <div class="msg" id="lm"></div>
   </div>
-
   <!-- SIGNUP -->
   <div id="signupForm" style="display:none">
     <div class="role-row">
@@ -71,14 +69,11 @@
     <button class="sbtn" id="signupBtn" onclick="doSignup()">Create Account →</button>
     <div class="msg" id="sm"></div>
   </div>
-
   <a href="index.html" class="bk">← Back to Home</a>
 </div>
-
 <script>
   const API = 'https://slm-b8oo.onrender.com/api/auth';
   let selRole = 'STUDENT';
-
   function switchTab(t) {
     document.querySelectorAll('.tab').forEach((el, i) =>
       el.classList.toggle('active', (t === 'login' && i === 0) || (t === 'signup' && i === 1))
@@ -87,26 +82,19 @@
     document.getElementById('signupForm').style.display = t === 'signup' ? 'block' : 'none';
     clearMsg();
   }
-
   function selectRole(r) {
     selRole = r;
     document.getElementById('rStudent').classList.toggle('active', r === 'STUDENT');
     document.getElementById('rTutor').classList.toggle('active',   r === 'TUTOR');
   }
-
   function clearMsg() {
     ['lm','sm'].forEach(id => { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; });
   }
-
   function showMsg(id, text, type) {
     const el = document.getElementById(id);
     el.textContent = text;
     el.className = 'msg ' + type;
   }
-
-  // ── KEY FIX: save everything into ONE slm_user object ──────
-  // Both dashboards read: JSON.parse(localStorage.getItem('slm_user'))
-  // and expect: user.userId, user.role, user.fullName, user.username
   function saveAuth(data) {
     const role = (data.role || '').toUpperCase();
     localStorage.setItem('slm_token', data.token);
@@ -117,7 +105,6 @@
       fullName: data.fullName || data.username
     }));
   }
-
   function redirectAfterAuth(role) {
     const r = (role || '').toUpperCase();
     if (r === 'TUTOR') {
@@ -126,9 +113,8 @@
       window.location.href = 'student-dashboard.html';
     }
   }
-
   async function doLogin() {
-  console.log("LOGIN BUTTON CLICKED"); 
+    console.log("LOGIN BUTTON CLICKED");
     const u   = document.getElementById('lu').value.trim();
     const p   = document.getElementById('lp').value.trim();
     const btn = document.getElementById('loginBtn');
@@ -149,12 +135,11 @@
         showMsg('lm', '❌ ' + (data.message || 'Login failed'), 'err');
       }
     } catch {
-      showMsg('lm', '⚠️ Cannot reach server. Make sure Spring Boot is running on port 8080.', 'err');
+      showMsg('lm', '⚠️ Cannot reach server. Make sure Spring Boot is running.', 'err');
     } finally {
       btn.disabled = false; btn.textContent = 'Login →';
     }
   }
-
   async function doSignup() {
     const fullName = document.getElementById('sn').value.trim();
     const username = document.getElementById('su').value.trim();
@@ -178,19 +163,17 @@
         showMsg('sm', '❌ ' + (data.message || 'Signup failed'), 'err');
       }
     } catch {
-      showMsg('sm', '⚠️ Cannot reach server. Make sure Spring Boot is running on port 8080.', 'err');
+      showMsg('sm', '⚠️ Cannot reach server. Make sure Spring Boot is running.', 'err');
     } finally {
       btn.disabled = false; btn.textContent = 'Create Account →';
     }
   }
-
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       if (document.getElementById('loginForm').style.display !== 'none') doLogin();
       else doSignup();
     }
   });
-
   // Already logged in? redirect away
   const existingToken = localStorage.getItem('slm_token');
   const existingUser  = JSON.parse(localStorage.getItem('slm_user') || '{}');
