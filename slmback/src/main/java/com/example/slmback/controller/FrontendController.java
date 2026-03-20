@@ -1,53 +1,60 @@
 package com.example.slmback.controller;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class FrontendController {
 
-    @GetMapping("/")
-    public String index() {
-        return "forward:/index.html";
+    @GetMapping(value = "/login.html", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> login() {
+        Resource resource = new ClassPathResource("static/login.html");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
     }
 
-    @GetMapping("/Login.html")
-    public String login() {
-        return "forward:/Login.html";
+    @GetMapping(value = "/courses.html", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> courses() {
+        Resource resource = new ClassPathResource("static/courses.html");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
     }
 
-    @GetMapping("/courses.html")
-    public String courses() {
-        return "forward:/courses.html";
+    @GetMapping(value = "/course.html", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> course() {
+        Resource resource = new ClassPathResource("static/course.html");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
     }
 
-    @GetMapping("/course.html")
-    public String course() {
-        return "forward:/course.html";
+    @GetMapping(value = "/quiz.html", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> quiz() {
+        Resource resource = new ClassPathResource("static/quiz.html");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
     }
 
-    @GetMapping("/quiz.html")
-    public String quiz() {
-        return "forward:/quiz.html";
+    @GetMapping(value = "/coding.html", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> coding() {
+        Resource resource = new ClassPathResource("static/coding.html");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
     }
 
-    @GetMapping("/coding.html")
-    public String coding() {
-        return "forward:/coding.html";
+    @GetMapping(value = "/student-dashboard.html", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> studentDashboard() {
+        Resource resource = new ClassPathResource("static/student-dashboard.html");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
     }
 
-    @GetMapping("/student-dashboard.html")
-    public String studentDashboard() {
-        return "forward:/student-dashboard.html";
+    @GetMapping(value = "/tutor-dashboard.html", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> tutorDashboard() {
+        Resource resource = new ClassPathResource("static/tutor-dashboard.html");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
     }
 
-    @GetMapping("/tutor-dashboard.html")
-    public String tutorDashboard() {
-        return "forward:/tutor-dashboard.html";
-    }
-
-    @GetMapping("/topics.html")
-    public String topics() {
-        return "forward:/topics.html";
+    @GetMapping(value = "/topics.html", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> topics() {
+        Resource resource = new ClassPathResource("static/topics.html");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
     }
 }
