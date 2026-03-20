@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg:       #0f1117;
       --surface:  #1a1d27;
@@ -24,7 +23,6 @@
       --mono:     'JetBrains Mono', monospace;
       --sans:     'DM Sans', sans-serif;
     }
-
     body {
       font-family: var(--sans);
       background: var(--bg);
@@ -33,7 +31,6 @@
       display: flex;
       flex-direction: column;
     }
-
     /* ── Header ── */
     header {
       background: var(--surface);
@@ -54,7 +51,6 @@
       transition: color .2s;
     }
     nav a:hover, nav a.active { color: var(--text); }
-
     /* ── Toolbar ── */
     .toolbar {
       background: var(--surface);
@@ -67,7 +63,6 @@
       flex-shrink: 0;
     }
     .toolbar-title { font-weight: 600; font-size: .95rem; color: var(--text); margin-right: 4px; }
-
     .lang-tabs { display: flex; gap: 6px; }
     .lang-tab {
       padding: 6px 16px;
@@ -83,9 +78,7 @@
     }
     .lang-tab:hover  { border-color: var(--accent); color: var(--text); }
     .lang-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
     .toolbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
-
     .btn {
       padding: 7px 18px;
       border-radius: 7px;
@@ -106,7 +99,6 @@
     .btn-viz:hover    { background: var(--accent2); color: #0f2e2b; }
     .btn-clear        { background: var(--surface2); color: var(--muted); border: 1.5px solid var(--border); }
     .btn-clear:hover  { color: var(--danger); border-color: var(--danger); }
-
     /* ── 3-pane layout ── */
     .main {
       display: grid;
@@ -116,7 +108,6 @@
       overflow: hidden;
       min-height: 0;
     }
-
     .pane-header {
       padding: 8px 16px;
       font-size: .75rem;
@@ -141,7 +132,6 @@
       letter-spacing: 0;
       text-transform: none;
     }
-
     /* Editor pane — top left */
     .editor-pane {
       grid-column: 1; grid-row: 1;
@@ -166,7 +156,6 @@
     }
     #codeEditor::placeholder { color: #3a3f5a; }
     #codeEditor:focus { background: #0c0f1d; }
-
     /* Output pane — bottom left */
     .output-pane {
       grid-column: 1; grid-row: 2;
@@ -189,7 +178,6 @@
     .out-error   { color: var(--danger); }
     .out-info    { color: var(--accent2); }
     .out-muted   { color: var(--muted); font-style: italic; }
-
     /* Viz pane — full right column */
     .viz-pane {
       grid-column: 2; grid-row: 1 / 3;
@@ -206,7 +194,6 @@
     }
     .viz-empty .viz-icon { font-size: 2.8rem; opacity: .2; }
     .viz-empty p { font-size: .88rem; line-height: 1.7; }
-
     /* Playback controls */
     .viz-playbar {
       display: none; padding: 10px 14px;
@@ -224,10 +211,8 @@
     .vp-sep { width: 1px; height: 18px; background: var(--border); margin: 0 2px; }
     .vp-counter { font-size: .75rem; color: var(--muted); margin-left: auto; }
     .vp-speed { font-size: .72rem; color: var(--muted); }
-
     /* Viz layout — 3 panels stacked */
     .viz-panels { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0; min-height: 0; }
-
     /* Current step highlight */
     .viz-current-line {
       padding: 8px 14px; background: rgba(124,106,247,.08);
@@ -236,7 +221,6 @@
     .vcl-label { font-size: .68rem; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
     .vcl-code  { font-family: var(--mono); font-size: .82rem; color: var(--accent2); white-space: pre-wrap; word-break: break-all; }
     .vcl-what  { font-size: .78rem; color: var(--muted); margin-top: 3px; }
-
     /* Variable watch panel */
     .viz-section { border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .viz-sec-hdr {
@@ -246,7 +230,6 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     .viz-sec-body { padding: 10px 14px; }
-
     .var-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .var-chip {
       background: var(--bg); border: 1px solid var(--border);
@@ -265,7 +248,6 @@
     .var-chip .vv { color: var(--success); }
     .var-chip .vold { font-size: .7rem; color: var(--muted); text-decoration: line-through; margin-right: 4px; }
     .var-empty { font-size: .78rem; color: var(--muted); font-style: italic; }
-
     /* Call stack */
     .stack-list { display: flex; flex-direction: column; gap: 4px; }
     .stack-frame {
@@ -278,7 +260,6 @@
     .sf-name  { color: var(--accent2); flex: 1; }
     .sf-line  { color: var(--muted); font-size: .7rem; }
     .sf-arrow { color: var(--accent); font-size: .7rem; }
-
     /* Output trace */
     .output-trace { font-family: var(--mono); font-size: .8rem; display: flex; flex-direction: column; gap: 4px; }
     .out-line {
@@ -287,7 +268,6 @@
     }
     .out-arrow { color: var(--success); flex-shrink: 0; }
     .out-text  { color: var(--text); white-space: pre-wrap; word-break: break-word; }
-
     /* Step timeline at bottom */
     .viz-timeline {
       flex-shrink: 0; padding: 10px 14px;
@@ -306,26 +286,21 @@
       transition: left .2s;
     }
     .tl-labels { display: flex; justify-content: space-between; font-size: .68rem; color: var(--muted); }
-
     /* SQL table */
     .sql-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .78rem; margin-top: 6px; }
     .sql-table th { background: var(--border); color: var(--accent); padding: 5px 10px; text-align: left; font-weight: 600; }
     .sql-table td { padding: 4px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
     .sql-table tr.new-row td { background: rgba(104,211,145,.08); }
     .sql-table tr:last-child td { border-bottom: none; }
-
     .viz-controls { display: none; }
-
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
     footer {
       background: var(--surface); border-top: 1px solid var(--border);
       text-align: center; padding: 10px;
       font-size: .78rem; color: var(--muted); flex-shrink: 0;
     }
-
     @media (max-width: 700px) {
       .main { grid-template-columns: 1fr; grid-template-rows: 340px 180px 340px; }
       .editor-pane { grid-column: 1; grid-row: 1; }
@@ -335,7 +310,6 @@
   </style>
 </head>
 <body>
-
 <header>
   <div class="logo">SLM</div>
   <nav>
@@ -343,10 +317,9 @@
     <a href="courses.html">Courses</a>
     <a href="quiz.html">Quiz</a>
     <a href="coding.html" class="active">Practice</a>
-    <a href="#" id="loginBtn">Login</a>
+    <a href="login.html" id="loginBtn">Login</a>
   </nav>
 </header>
-
 <div class="toolbar">
   <span class="toolbar-title">💻 Code Practice</span>
   <div class="lang-tabs">
@@ -360,9 +333,7 @@
     <button class="btn btn-run"   onclick="runCode()"      id="runBtn">▶ Run</button>
   </div>
 </div>
-
 <div class="main">
-
   <!-- Editor: top-left -->
   <div class="editor-pane">
     <div class="pane-header">
@@ -372,7 +343,6 @@
     <textarea id="codeEditor" spellcheck="false" autocorrect="off" autocapitalize="off"
       placeholder="# Write your Python code here..."></textarea>
   </div>
-
   <!-- Output: bottom-left -->
   <div class="output-pane">
     <div class="pane-header">
@@ -381,14 +351,12 @@
     </div>
     <div id="outputBox"><span class="out-muted">Run your code to see output here...</span></div>
   </div>
-
   <!-- Visualization: full right -->
   <div class="viz-pane">
     <div class="pane-header">
       Visualization
       <span class="pane-badge">Step-by-step trace</span>
     </div>
-
     <!-- Playback bar -->
     <div class="viz-playbar" id="vizPlaybar">
       <button class="vp-btn" onclick="vizStep(-1)">◀ Prev</button>
@@ -403,7 +371,6 @@
       <button class="vp-btn" id="spd3" onclick="setSpeed(120)">2x</button>
       <span class="vp-counter" id="vizCounter">0 / 0</span>
     </div>
-
     <!-- Step panels -->
     <div class="viz-panels" id="vizPanels">
       <div class="viz-empty" id="vizEmpty">
@@ -412,7 +379,6 @@
         Watch variables change,<br>loops iterate, and output<br>build up line by line.</p>
       </div>
     </div>
-
     <!-- Timeline -->
     <div class="viz-timeline" id="vizTimeline" style="display:none">
       <div class="tl-track" id="tlTrack" onclick="tlClick(event)">
@@ -425,15 +391,10 @@
       </div>
     </div>
   </div>
-
-
 </div>
-
 <footer><p>© Smart Learning System</p></footer>
-
 <script src="js/auth.js"></script>
 <script>
-
 // ── Starter code templates ──────────────────────────────
 const STARTER = {
   python: `# Python Practice
@@ -462,13 +423,10 @@ INSERT INTO students VALUES (3, 'Carol', 85);
 SELECT name, score FROM students WHERE score > 80 ORDER BY score DESC;
 `
 };
-
 const LANG_LABELS = { python: 'Python 3', java: 'Java', sql: 'SQLite' };
 let currentLang = 'python';
-
 // Init editor with starter code
 document.getElementById('codeEditor').value = STARTER.python;
-
 // ── Language switch ─────────────────────────────────────
 function setLang(lang, el) {
   currentLang = lang;
@@ -483,35 +441,27 @@ function setLang(lang, el) {
   clearOutput();
   resetViz();
 }
-
 function clearEditor() {
   document.getElementById('codeEditor').value = STARTER[currentLang];
   clearOutput();
   resetViz();
 }
-
 function clearOutput() {
   document.getElementById('outputBox').innerHTML =
     '<span class="out-muted">Run your code to see output here...</span>';
   document.getElementById('runStatus').textContent = '';
 }
-
-
 // ── Run code via Spring Boot + Gemini ───────────────────
 async function runCode() {
   const code = document.getElementById('codeEditor').value.trim();
   if (!code) return;
-
   const btn = document.getElementById('runBtn');
   btn.disabled = true;
   btn.textContent = '⏳ Running...';
-
   document.getElementById('outputBox').innerHTML =
     '<span class="out-info">⏳ Sending to Gemini AI executor...</span>';
   document.getElementById('runStatus').textContent = '';
-
   try {
-    // POST to your Spring Boot backend — which calls Gemini
     const res = await fetch('https://slm-b8oo.onrender.com/api/code/run', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -521,12 +471,9 @@ async function runCode() {
         stdin:    ''
       })
     });
-
     if (!res.ok) throw new Error('Server returned HTTP ' + res.status);
-
     const result = await res.json();
     showResult(result);
-
   } catch (err) {
     document.getElementById('outputBox').innerHTML =
       `<span class="out-error">⚠️ Could not reach backend.\n\n` +
@@ -538,46 +485,37 @@ async function runCode() {
     btn.textContent = '▶ Run';
   }
 }
-
 function showResult(result) {
   const stdout = (result.stdout || '').trim();
   const stderr = (result.stderr || '').trim();
-
   if (stderr && !stdout) {
-    // Error only
     document.getElementById('outputBox').innerHTML =
       `<span class="out-error">${escHtml(stderr)}</span>`;
     setStatus('✗ Error', 'var(--danger)');
-
   } else if (stdout) {
-    // Has output
     let html = `<span class="out-success">${escHtml(stdout)}</span>`;
     if (stderr) {
       html += `\n\n<span class="out-error">⚠️ Warnings:\n${escHtml(stderr)}</span>`;
     }
     document.getElementById('outputBox').innerHTML = html;
     setStatus('✓ Success', 'var(--success)');
-
   } else {
     document.getElementById('outputBox').innerHTML =
       `<span class="out-muted">No output produced.</span>`;
     setStatus('', '');
   }
 }
-
 function setStatus(text, color) {
   const el = document.getElementById('runStatus');
   el.textContent  = text;
   el.style.color  = color;
 }
-
 // ── Viz state ─────────────────────────────────────────────
 let vizSteps   = [];
 let vizCurrent = 0;
 let vizTimer   = null;
 let vizSpeed   = 400;
 let prevVars   = {};
-
 function resetViz() {
   vizSteps = []; vizCurrent = 0; prevVars = {};
   clearInterval(vizTimer); vizTimer = null;
@@ -590,40 +528,30 @@ function resetViz() {
       <p>Click <b style="color:var(--accent2)">Visualize</b> to trace<br>your code step by step.</p>
     </div>`;
 }
-
 // ── Run visualize — Gemini-powered deep trace ─────────────
 async function runVisualize() {
   const code = document.getElementById('codeEditor').value.trim();
   if (!code) { alert('Write some code first!'); return; }
-
   const btn = document.getElementById('vizBtn');
   btn.disabled = true;
   btn.textContent = '⏳ Tracing...';
-
-  // Show loading in viz panel
   document.getElementById('vizPanels').innerHTML = `
     <div class="viz-empty">
       <div class="viz-icon" style="animation:spin .8s linear infinite;display:inline-block">◈</div>
       <p style="margin-top:12px">Gemini is tracing your code...<br>
       <span style="font-size:.75rem;color:var(--muted)">Analysing every line, variable and loop</span></p>
     </div>`;
-
   try {
     const res = await fetch('https://slm-b8oo.onrender.com/api/code/visualize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: code, language: currentLang })
     });
-
     if (!res.ok) throw new Error('Backend returned ' + res.status);
     const data = await res.json();
     const raw  = (data.stdout || data.stderr || '').trim();
-
-    // Parse Gemini's JSON trace response
     const steps = parseGeminiTrace(raw, code);
-
     if (!steps || steps.length === 0) {
-      // Fallback to local tracer
       let fallback = [];
       if      (currentLang === 'python') fallback = tracePython(code);
       else if (currentLang === 'java')   fallback = traceJava(code);
@@ -637,16 +565,12 @@ async function runVisualize() {
       }
       return;
     }
-
     launchViz(steps);
-
   } catch (err) {
-    // Fallback to local tracer on network error
     let fallback = [];
     if      (currentLang === 'python') fallback = tracePython(code);
     else if (currentLang === 'java')   fallback = traceJava(code);
     else if (currentLang === 'sql')    fallback = traceSQL(code);
-
     if (fallback.length) {
       launchViz(fallback);
     } else {
@@ -659,7 +583,6 @@ async function runVisualize() {
     btn.textContent = '◈ Visualize';
   }
 }
-
 function launchViz(steps) {
   vizSteps = steps; vizCurrent = 0; prevVars = {};
   document.getElementById('vizPlaybar').classList.add('active');
@@ -667,24 +590,16 @@ function launchViz(steps) {
   document.getElementById('tlEnd').textContent = steps.length;
   renderStep(0);
 }
-
 // ── Parse Gemini trace response ────────────────────────────
 function parseGeminiTrace(raw, code) {
   try {
-    // Strip markdown fences if present
     let clean = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-
-    // Find JSON array boundaries
     const start = clean.indexOf('[');
     const end   = clean.lastIndexOf(']');
     if (start === -1 || end === -1) return null;
-
     clean = clean.substring(start, end + 1);
     const parsed = JSON.parse(clean);
-
     if (!Array.isArray(parsed) || parsed.length === 0) return null;
-
-    // Normalize each step to match our renderStep() format
     return parsed.map((s, i) => ({
       line:   s.line   || '',
       label:  s.label  || `Step ${i + 1}`,
@@ -701,22 +616,17 @@ function parseGeminiTrace(raw, code) {
     return null;
   }
 }
-
 // ── Render single step ────────────────────────────────────
 function renderStep(idx) {
   if (idx < 0 || idx >= vizSteps.length) return;
   vizCurrent = idx;
   const step = vizSteps[idx];
   const pct  = ((idx + 1) / vizSteps.length * 100).toFixed(1);
-
   document.getElementById('vizCounter').textContent = (idx+1) + ' / ' + vizSteps.length;
   document.getElementById('tlFill').style.width  = pct + '%';
   document.getElementById('tlThumb').style.left  = pct + '%';
-
   const panels = document.getElementById('vizPanels');
   panels.innerHTML = '';
-
-  // ── 1. Current line highlight ──
   const curDiv = document.createElement('div');
   curDiv.className = 'viz-current-line';
   curDiv.innerHTML = `
@@ -724,8 +634,6 @@ function renderStep(idx) {
     <div class="vcl-code">${escHtml(step.line)}</div>
     <div class="vcl-what">${step.what || ''}</div>`;
   panels.appendChild(curDiv);
-
-  // ── 2. Variable Watch ──
   const varSec = document.createElement('div');
   varSec.className = 'viz-section';
   const vars  = step.vars || {};
@@ -750,8 +658,6 @@ function renderStep(idx) {
     </div>`;
   panels.appendChild(varSec);
   prevVars = {...vars};
-
-  // ── 3. Call Stack ──
   if (step.stack && step.stack.length > 0) {
     const stackSec = document.createElement('div');
     stackSec.className = 'viz-section';
@@ -769,8 +675,6 @@ function renderStep(idx) {
       </div>`;
     panels.appendChild(stackSec);
   }
-
-  // ── 4. SQL Table state ──
   if (step.table) {
     const tblSec = document.createElement('div');
     tblSec.className = 'viz-section';
@@ -791,8 +695,6 @@ function renderStep(idx) {
       </div>`;
     panels.appendChild(tblSec);
   }
-
-  // ── 5. Output so far ──
   const outputLines = vizSteps.slice(0, idx+1).filter(s => s.output !== undefined);
   if (outputLines.length > 0) {
     const outSec = document.createElement('div');
@@ -812,8 +714,6 @@ function renderStep(idx) {
       </div>`;
     panels.appendChild(outSec);
   }
-
-  // ── 6. Explanation note ──
   if (step.note) {
     const noteSec = document.createElement('div');
     noteSec.style.cssText = 'padding:10px 14px;font-size:.8rem;color:var(--muted);line-height:1.6;border-top:1px solid var(--border)';
@@ -821,15 +721,12 @@ function renderStep(idx) {
     panels.appendChild(noteSec);
   }
 }
-
 // ── Playback controls ─────────────────────────────────────
 function vizStep(dir) {
   const next = vizCurrent + dir;
   if (next >= 0 && next < vizSteps.length) renderStep(next);
 }
-
 function vizGoTo(idx) { renderStep(Math.max(0, Math.min(idx, vizSteps.length-1))); }
-
 function togglePlay() {
   const btn = document.getElementById('vizPlayBtn');
   if (vizTimer) {
@@ -848,7 +745,6 @@ function togglePlay() {
     }, vizSpeed);
   }
 }
-
 function setSpeed(ms) {
   vizSpeed = ms;
   ['spd1','spd2','spd3'].forEach(id => document.getElementById(id).classList.remove('active'));
@@ -856,25 +752,20 @@ function setSpeed(ms) {
   if (map[ms]) document.getElementById(map[ms]).classList.add('active');
   if (vizTimer) { clearInterval(vizTimer); vizTimer = null; togglePlay(); }
 }
-
 function tlClick(e) {
   const rect = document.getElementById('tlTrack').getBoundingClientRect();
   const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   vizGoTo(Math.round(pct * (vizSteps.length - 1)));
 }
-
 // ── Python tracer ─────────────────────────────────────────
 function tracePython(code) {
   const steps = [], vars = {}, stack = [{ name: 'main', line: 1 }];
   const lines = code.split('\n');
   const outputBuf = [];
-
   for (let i = 0; i < lines.length; i++) {
     const raw  = lines[i];
     const line = raw.trim();
     if (!line || line.startsWith('#')) continue;
-
-    // augmented
     const augM = line.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|\/\/=|%=|\*\*=)\s*(.+)$/);
     if (augM) {
       const [, name, op, expr] = augM;
@@ -892,8 +783,6 @@ function tracePython(code) {
         vars: {...vars}, stack: [...stack], note: `<b>${name}</b> ${op} ${fmtVal(rhs)} → ${fmtVal(vars[name])}` });
       continue;
     }
-
-    // assignment
     const assM = line.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
     if (assM && !line.startsWith('for') && !line.startsWith('if') && !line.startsWith('while')) {
       const [, name, expr] = assM;
@@ -904,8 +793,6 @@ function tracePython(code) {
         vars: {...vars}, stack: [...stack], note: `Variable <b>${name}</b> is set to <b>${fmtVal(val)}</b>` });
       continue;
     }
-
-    // for loop
     const forM = line.match(/^for\s+([a-zA-Z_]\w*)\s+in\s+range\((.+)\)/);
     if (forM) {
       const [, iterVar, rangeArgs] = forM;
@@ -917,13 +804,11 @@ function tracePython(code) {
       stack[stack.length-1].line = i+1;
       steps.push({ line: raw, label: `Line ${i+1} — Loop`, what: `Starting loop: ${count} iterations`,
         vars: {...vars}, stack: [...stack], note: `Loop runs <b>${count}</b> times: ${iterVar} goes ${start} → ${end-1}` });
-
       const body = [];
       for (let j = i+1; j < lines.length; j++) {
         if (lines[j].match(/^\s+/) || lines[j].trim() === '') body.push({ raw: lines[j], lineNum: j+1 });
         else break;
       }
-
       let iter = 0;
       for (let v = start; v < end; v += step) {
         if (iter >= 12) {
@@ -932,12 +817,9 @@ function tracePython(code) {
           break;
         }
         vars[iterVar] = v;
-
-        // execute body
         body.forEach(({ raw: bl, lineNum: ln }) => {
           const bt = bl.trim();
           if (!bt || bt.startsWith('#')) return;
-
           const bAug = bt.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|\/\/=|%=)\s*(.+)$/);
           if (bAug) {
             const [, n, op, ex] = bAug;
@@ -952,7 +834,6 @@ function tracePython(code) {
             steps.push({ line: bl, label: `Line ${ln} — iter ${iter+1}`, what: `${n}: ${fmtVal(bprev)} → ${fmtVal(vars[n])}`,
               vars: {...vars}, stack: [...stack], note: `<b>${iterVar}</b>=${v}: ${n} updated from ${fmtVal(bprev)} to ${fmtVal(vars[n])}` });
           }
-
           const bAss = bt.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
           if (bAss && !bt.startsWith('for') && !bt.startsWith('if')) {
             const [, n, ex] = bAss;
@@ -961,8 +842,6 @@ function tracePython(code) {
             steps.push({ line: bl, label: `Line ${ln} — iter ${iter+1}`, what: `${n} ← ${fmtVal(val)}`,
               vars: {...vars}, stack: [...stack] });
           }
-
-          // print inside loop
           const pm = bt.match(/^print\((.+)\)$/);
           if (pm) {
             const val = evalPrint(pm[1], vars);
@@ -972,21 +851,16 @@ function tracePython(code) {
               note: `prints <b>"${escHtml(String(val))}"</b> to console` });
           }
         });
-
-        // loop iteration marker
         steps.push({ line: `↩ ${iterVar} = ${v}  (iteration ${iter+1}/${count})`,
           label: `Iteration ${iter+1} done`, what: `Loop body finished, ${iterVar} = ${v}`,
           vars: {...vars}, stack: [...stack],
           note: `After iteration ${iter+1}: ${Object.entries(vars).filter(([k])=>k!==iterVar).map(([k,v])=>`${k}=${fmtVal(v)}`).join(', ') || 'no other vars'}` });
         iter++;
       }
-
       steps.push({ line: `✓ Loop finished`, label: `Loop end`, what: `All ${count} iterations complete`,
         vars: {...vars}, stack: [...stack], note: `Loop completed. Final values: ${Object.entries(vars).map(([k,v])=>`${k}=${fmtVal(v)}`).join(', ')}` });
       continue;
     }
-
-    // print
     const pm = line.match(/^print\((.+)\)$/);
     if (pm) {
       const val = evalPrint(pm[1], vars);
@@ -997,8 +871,6 @@ function tracePython(code) {
         note: `<b>print()</b> outputs <b>"${escHtml(String(val))}"</b> → console` });
       continue;
     }
-
-    // if/elif/else
     if (line.startsWith('if ') || line.startsWith('elif ') || line === 'else:') {
       let result = '?';
       const condM = line.match(/^(?:if|elif)\s+(.+?):?$/);
@@ -1010,23 +882,17 @@ function tracePython(code) {
         vars: {...vars}, stack: [...stack], note: `Condition check: <b>${escHtml(line.replace(/:$/,''))}</b> → ${result}` });
       continue;
     }
-
-    // while
     if (line.startsWith('while ')) {
       steps.push({ line: raw, label: `Line ${i+1} — While`, what: `Checking loop condition`,
         vars: {...vars}, stack: [...stack] });
       continue;
     }
-
-    // function def
     const fnM = line.match(/^def\s+(\w+)\s*\(([^)]*)\)\s*:/);
     if (fnM) {
       steps.push({ line: raw, label: `Line ${i+1} — Define function`, what: `Function ${fnM[1]}() defined`,
         vars: {...vars}, stack: [...stack], note: `Defines function <b>${fnM[1]}</b> with params: ${fnM[2] || 'none'}` });
       continue;
     }
-
-    // return
     if (line.startsWith('return ')) {
       const retM = line.match(/^return\s+(.+)$/);
       const val  = retM ? evalSafe(retM[1], vars) : undefined;
@@ -1034,24 +900,18 @@ function tracePython(code) {
         vars: {...vars}, stack: [...stack], note: `Function returns <b>${fmtVal(val)}</b>` });
       continue;
     }
-
     steps.push({ line: raw, label: `Line ${i+1}`, what: escHtml(line), vars: {...vars}, stack: [...stack] });
   }
-
-  // final output summary
   if (outputBuf.length > 0) {
     steps.push({ line: '--- Program finished ---', label: 'Final Output', what: 'All output produced',
       vars: {...vars}, stack: [{name:'main',line:'end'}],
       output: outputBuf.join('\n'),
       note: `Complete output:\n<pre style="font-family:var(--mono);font-size:.78rem;margin-top:6px;color:var(--success)">${escHtml(outputBuf.join('\n'))}</pre>` });
   }
-
   return steps;
 }
-
 function evalPrint(expr, vars) {
   expr = expr.trim();
-  // handle print("text", var, ...) with commas
   const parts = expr.split(',').map(p => {
     p = p.trim();
     const strM = p.match(/^["'](.+)["']$/);
@@ -1060,22 +920,17 @@ function evalPrint(expr, vars) {
   });
   return parts.join(' ');
 }
-
 // ── Java tracer ───────────────────────────────────────────
 function traceJava(code) {
   const steps = [], vars = {}, stack = [{ name: 'main', line: 1 }];
   const lines = code.split('\n');
   const outputBuf = [];
-
   lines.forEach((raw, i) => {
     const line = raw.trim();
     if (!line || line.startsWith('//') || line === '{' || line === '}') return;
     if (line.startsWith('public class') || line.includes('public static void main')) return;
     if (line === 'import java.util.Stack;' || line === 'import java.util.*;') return;
-
     stack[0].line = i+1;
-
-    // Declaration with assignment
     const declM = line.match(/^(?:int|double|float|long|String|boolean|char|var)\s+([a-zA-Z_]\w*)\s*=\s*(.+?);$/);
     if (declM) {
       const [, name, expr] = declM;
@@ -1085,8 +940,6 @@ function traceJava(code) {
         vars: {...vars}, stack: [...stack], note: `Declares <b>${name}</b> = ${fmtVal(val)}` });
       return;
     }
-
-    // Declaration without value
     const declNoVal = line.match(/^(?:int|double|float|long|String|boolean|char)\s+([a-zA-Z_]\w*)\s*;$/);
     if (declNoVal) {
       vars[declNoVal[1]] = 0;
@@ -1094,8 +947,6 @@ function traceJava(code) {
         vars: {...vars}, stack: [...stack] });
       return;
     }
-
-    // Augmented assignment
     const augM = line.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|%=)\s*(.+?);$/);
     if (augM) {
       const [, name, op, expr] = augM;
@@ -1109,8 +960,6 @@ function traceJava(code) {
         vars: {...vars}, stack: [...stack], note: `<b>${name}</b> ${op} ${fmtVal(rhs)} → now <b>${fmtVal(vars[name])}</b>` });
       return;
     }
-
-    // i++ / i--
     const incM = line.match(/^([a-zA-Z_]\w*)(\+\+|--);?$/);
     if (incM) {
       const [, name, op] = incM;
@@ -1120,8 +969,6 @@ function traceJava(code) {
         vars: {...vars}, stack: [...stack] });
       return;
     }
-
-    // for loop
     const forM = line.match(/^for\s*\(\s*(?:int\s+)?(\w+)\s*=\s*(\d+)\s*;\s*\1\s*([<>]=?|!=)\s*([^;]+)\s*;\s*\1(\+\+|--|\+=\s*\d+|-=\s*\d+)/);
     if (forM) {
       const [, iterVar, startStr, op, endStr] = forM;
@@ -1129,11 +976,8 @@ function traceJava(code) {
       const count = op === '<' ? end - start : op === '<=' ? end - start + 1 : Math.abs(end - start);
       steps.push({ line: raw, label: `Line ${i+1} — For loop`, what: `Loop: ${iterVar} = ${start} to ${end}, ${count} iters`,
         vars: {...vars}, stack: [...stack], note: `<b>for</b> loop: ${iterVar} starts at ${start}, runs ${count} time(s)` });
-
-      // Gather body
-      const depth = (line.match(/\{/) ? 1 : 0);
       const body = [];
-      let d = depth;
+      let d = (line.match(/\{/) ? 1 : 0);
       for (let j = i+1; j < lines.length; j++) {
         const bl = lines[j].trim();
         if (!bl) continue;
@@ -1141,15 +985,12 @@ function traceJava(code) {
         if (d <= 0 && bl === '}') break;
         if (bl !== '{') body.push({ raw: lines[j], lineNum: j+1 });
       }
-
-      let bound = op==='<' ? end : op==='<='? end+1 : end-1;
       let v = start, iter = 0;
       while ((op==='<'?v<end:op==='<='?v<=end:op==='>'?v>end:v>=Number(endStr)) && iter < 12) {
         vars[iterVar] = v;
         body.forEach(({ raw: bl, lineNum: ln }) => {
           const bt = bl.trim();
           if (!bt || bt === '{' || bt === '}' || bt.startsWith('//')) return;
-
           const bAug = bt.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|%=)\s*(.+?);$/);
           if (bAug) {
             const [, n, bop, ex] = bAug;
@@ -1160,7 +1001,6 @@ function traceJava(code) {
             steps.push({ line: bl, label: `Line ${ln} iter ${iter+1}`, what: `${n}: ${fmtVal(bp)} → ${fmtVal(vars[n])}`,
               vars: {...vars}, stack: [...stack], note: `<b>${iterVar}</b>=${v}: ${n} → ${fmtVal(vars[n])}` });
           }
-
           const bInc = bt.match(/^([a-zA-Z_]\w*)(\+\+|--);?$/);
           if (bInc) {
             const bp = vars[bInc[1]] ?? 0;
@@ -1168,7 +1008,6 @@ function traceJava(code) {
             steps.push({ line: bl, label: `Line ${ln} iter ${iter+1}`, what: `${bInc[1]}: ${bp} → ${vars[bInc[1]]}`,
               vars: {...vars}, stack: [...stack] });
           }
-
           if (bt.includes('System.out.print')) {
             const sM = bt.match(/System\.out\.println?\s*\((.+)\)/);
             if (sM) {
@@ -1179,12 +1018,10 @@ function traceJava(code) {
             }
           }
         });
-
         steps.push({ line: `↩ ${iterVar} = ${v}  (iter ${iter+1}/${count})`,
           label: `Iteration ${iter+1} done`, what: `Body executed, ${iterVar} = ${v}`,
           vars: {...vars}, stack: [...stack],
           note: `After iter ${iter+1}: ${Object.entries(vars).map(([k,v])=>`${k}=${fmtVal(v)}`).join(', ')}` });
-
         v = forM[5].includes('++') ? v+1 : forM[5].includes('--') ? v-1 : v + (Number(forM[5].match(/\d+/)?.[0]||1));
         iter++;
       }
@@ -1193,8 +1030,6 @@ function traceJava(code) {
         vars: {...vars}, stack: [...stack], note: `Loop complete. Final: ${Object.entries(vars).map(([k,v])=>`${k}=${fmtVal(v)}`).join(', ')}` });
       return;
     }
-
-    // System.out.println
     if (line.includes('System.out.print')) {
       const sM = line.match(/System\.out\.println?\s*\((.+)\)\s*;?$/);
       if (sM) {
@@ -1205,8 +1040,6 @@ function traceJava(code) {
         return;
       }
     }
-
-    // if statement
     if (line.startsWith('if ') || line.startsWith('if(')) {
       const cM = line.match(/^if\s*\((.+?)\)/);
       let result = '?';
@@ -1216,7 +1049,6 @@ function traceJava(code) {
       return;
     }
   });
-
   if (outputBuf.length > 0) {
     steps.push({ line: '--- Program finished ---', label: 'Final Output', what: 'Execution complete',
       vars: {...vars}, stack: [{name:'main',line:'end'}],
@@ -1225,10 +1057,8 @@ function traceJava(code) {
   }
   return steps;
 }
-
 function evalPrintJava(expr, vars) {
   expr = expr.trim();
-  // handle "text" + var + ... string concatenation
   const parts = expr.split(/\+(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(p => {
     p = p.trim();
     const strM = p.match(/^["'](.*)["']$/);
@@ -1238,15 +1068,12 @@ function evalPrintJava(expr, vars) {
   });
   return parts.join('');
 }
-
 // ── SQL tracer ────────────────────────────────────────────
 function traceSQL(code) {
   const steps = [], tables = {};
   const stmts = code.split(';').map(s => s.trim()).filter(Boolean);
-
   stmts.forEach((stmt, i) => {
     const up = stmt.toUpperCase().trim();
-
     if (up.startsWith('CREATE TABLE')) {
       const m = stmt.match(/CREATE\s+TABLE\s+(\w+)\s*\((.+)\)/si);
       if (m) {
@@ -1256,7 +1083,6 @@ function traceSQL(code) {
           what: `Table "${tname}" created with ${cols.length} columns`, vars: {},
           note: `Created table <b>${tname}</b> with columns: ${cols.join(', ')}` });
       }
-
     } else if (up.startsWith('INSERT INTO')) {
       const m = stmt.match(/INSERT\s+INTO\s+(\w+)\s+VALUES\s*\((.+)\)/si);
       if (m) {
@@ -1270,24 +1096,18 @@ function traceSQL(code) {
             note: `Inserted row ${newIdx+1} into <b>${tname}</b>: [${vals.join(', ')}]` });
         }
       }
-
     } else if (up.startsWith('SELECT')) {
       const fromM  = stmt.match(/FROM\s+(\w+)/i);
       const whereM = stmt.match(/WHERE\s+(.+?)(?:\s+ORDER|\s+GROUP|\s+LIMIT|$)/i);
       const orderM = stmt.match(/ORDER\s+BY\s+(\w+)\s*(ASC|DESC)?/i);
       const tname  = fromM ? fromM[1] : null;
       let rows = tname && tables[tname] ? [...tables[tname].rows] : [];
-      let note = `SELECT from <b>${tname}</b>`;
-
-      // Step 1: show all rows before filter
       if (tname && tables[tname]) {
         steps.push({ line: stmt+';', label: `Stmt ${i+1} — SELECT (scan)`,
           what: `Scanning all ${rows.length} rows in ${tname}`, vars: {},
           table: { name: tname, cols: tables[tname].cols, rows: [...rows] },
           note: `Full table scan: ${rows.length} rows found in <b>${tname}</b>` });
       }
-
-      // Step 2: apply WHERE filter
       if (whereM && tname && tables[tname]) {
         const before = rows.length;
         const condM = whereM[1].trim().match(/(\w+)\s*([><=!]+)\s*(.+)/);
@@ -1309,8 +1129,6 @@ function traceSQL(code) {
           table: { name: tname, cols: tables[tname].cols, rows: [...rows] },
           note: `WHERE <b>${escHtml(whereM[1])}</b> — kept ${rows.length} of ${before} rows` });
       }
-
-      // Step 3: apply ORDER BY
       if (orderM && tname && tables[tname]) {
         const ci  = tables[tname].cols.indexOf(orderM[1]);
         const dir = (orderM[2] || 'ASC').toUpperCase();
@@ -1324,13 +1142,10 @@ function traceSQL(code) {
           table: { name: tname, cols: tables[tname].cols, rows: [...rows] },
           note: `Sorted by <b>${orderM[1]} ${dir}</b> — final result: ${rows.length} row(s)` });
       }
-
-      // Step 4: final result
       steps.push({ line: stmt+';', label: `Stmt ${i+1} — Result`,
         what: `Query returned ${rows.length} row(s)`, vars: {},
         table: { name: tname || 'result', cols: tname && tables[tname] ? tables[tname].cols : [], rows: [...rows] },
         note: `Final result: <b>${rows.length}</b> row(s) returned`, output: `${rows.length} row(s) returned` });
-
     } else if (up.startsWith('UPDATE')) {
       steps.push({ line: stmt+';', label: `Stmt ${i+1} — UPDATE`, what: 'Updating rows', vars: {}, note: escHtml(stmt.substring(0,80)) });
     } else if (up.startsWith('DELETE')) {
@@ -1341,12 +1156,10 @@ function traceSQL(code) {
   });
   return steps;
 }
-
 // ── Helpers ───────────────────────────────────────────────
 function evalSafe(expr, vars) {
   if (!expr) return undefined;
   expr = String(expr).trim().replace(/;$/, '');
-  // replace Java/Python power
   expr = expr.replace(/Math\.pow\(([^,]+),([^)]+)\)/, '($1)**($2)');
   expr = expr.replace(/Math\.sqrt\(([^)]+)\)/, 'Math.sqrt($1)');
   Object.entries(vars).forEach(([k, v]) => {
@@ -1355,7 +1168,6 @@ function evalSafe(expr, vars) {
   try { return Function('"use strict"; return (' + expr + ')')(); }
   catch { return expr; }
 }
-
 function fmtVal(v) {
   if (v === undefined || v === null) return 'null';
   if (typeof v === 'string')  return '"' + v + '"';
@@ -1363,12 +1175,10 @@ function fmtVal(v) {
   if (typeof v === 'number')  return Number.isInteger(v) ? v : parseFloat(v.toFixed(4));
   return String(v);
 }
-
 function escHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 // Tab key
 document.getElementById('codeEditor').addEventListener('keydown', e => {
   if (e.key === 'Tab') {
@@ -1378,7 +1188,6 @@ document.getElementById('codeEditor').addEventListener('keydown', e => {
     el.selectionStart = el.selectionEnd = s + 4;
   }
 });
-
 </script>
 </body>
 </html>
